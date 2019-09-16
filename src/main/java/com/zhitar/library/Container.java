@@ -1,5 +1,6 @@
 package com.zhitar.library;
 
+import com.zhitar.library.annotation.TransactionProxyCreator;
 import com.zhitar.library.dao.attributedao.AttributeDao;
 import com.zhitar.library.dao.authordao.AuthorDao;
 import com.zhitar.library.dao.auxiliarydao.BookAttributeDAO;
@@ -10,9 +11,9 @@ import com.zhitar.library.dao.daofactory.AbstractDAOFactory;
 import com.zhitar.library.dao.daofactory.MySQLDaoFactory;
 import com.zhitar.library.dao.roledao.RoleDao;
 import com.zhitar.library.dao.userdao.UserDao;
-import com.zhitar.library.service.AdminService;
-import com.zhitar.library.service.BookService;
-import com.zhitar.library.service.UserService;
+import com.zhitar.library.service.impl.AdminServiceImpl;
+import com.zhitar.library.service.impl.BookServiceImpl;
+import com.zhitar.library.service.impl.UserServiceImpl;
 import com.zhitar.library.validation.ValidationService;
 import org.apache.log4j.Logger;
 
@@ -39,26 +40,26 @@ public class Container {
         BookAuthorDAO bookAuthorDAO = daoFactory.getBookAuthorDAO();
         UserRoleDao userRoleDAO = daoFactory.getUserRoleDAO();
 
-        UserService userService = new UserService(userDAO, roleDAO, userRoleDAO);
+        UserServiceImpl userService = new UserServiceImpl(userDAO, roleDAO, userRoleDAO);
 
-        BookService bookService = new BookService(authorDAO, bookDAO, attributeDAO, userDAO, bookAuthorDAO, bookAttributeDAO);
-        AdminService adminService = new AdminService(authorDAO, bookDAO, attributeDAO, userDAO, bookAuthorDAO, bookAttributeDAO);
+        BookServiceImpl bookService = new BookServiceImpl(authorDAO, bookDAO, attributeDAO, userDAO, bookAuthorDAO, bookAttributeDAO);
+        AdminServiceImpl adminService = new AdminServiceImpl(authorDAO, bookDAO, attributeDAO, userDAO, bookAuthorDAO, bookAttributeDAO);
 
         ValidationService validationService = new ValidationService();
 
-        container.put("daoFactory", daoFactory);
-        container.put("userDAO", userDAO);
-        container.put("roleDAO", roleDAO);
-        container.put("bookDAO", bookDAO);
-        container.put("authorDAO", authorDAO);
-        container.put("attributeDAO", attributeDAO);
-        container.put("bookAttributeDAO", bookAttributeDAO);
-        container.put("bookAuthorDAO", bookAuthorDAO);
-        container.put("userRoleDAO", userRoleDAO);
-        container.put("userService", userService);
-        container.put("bookService", bookService);
-        container.put("adminService", adminService);
-        container.put("validationService", validationService);
+        put("daoFactory", daoFactory);
+        put("userDAO", userDAO);
+        put("roleDAO", roleDAO);
+        put("bookDAO", bookDAO);
+        put("authorDAO", authorDAO);
+        put("attributeDAO", attributeDAO);
+        put("bookAttributeDAO", bookAttributeDAO);
+        put("bookAuthorDAO", bookAuthorDAO);
+        put("userRoleDAO", userRoleDAO);
+        put("userService", userService);
+        put("bookService", bookService);
+        put("adminService", adminService);
+        put("validationService", validationService);
     }
 
     public static Container getInstance() {
@@ -83,6 +84,18 @@ public class Container {
     }
 
     public <T> T getBean(Class<T> clazz) {
-        return container.values().stream().filter(value -> clazz.isAssignableFrom(value.getClass())).map(value -> (T)value).findFirst().orElse(null);
+        return container.values().stream().filter(value -> clazz.isAssignableFrom(value.getClass())).map(value -> (T) value).findFirst().orElse(null);
+    }
+
+    private Object put(String name, Object value) {
+        value = getProxy(value);
+        return container.put(name, value);
+    }
+
+    private <T> T getProxy(T bean) {
+        if (bean != null) {
+            bean = TransactionProxyCreator.createProxy(bean);
+        }
+        return bean;
     }
 }

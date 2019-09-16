@@ -4,6 +4,7 @@ import com.zhitar.library.Container;
 import com.zhitar.library.controller.action.AbstractAction;
 import com.zhitar.library.domain.User;
 import com.zhitar.library.service.AdminService;
+import com.zhitar.library.service.impl.AdminServiceImpl;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;

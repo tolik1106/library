@@ -19,8 +19,7 @@ public class DeleteAction implements Action {
         String path = request.getServletPath();
         LOG.info("execute with servlet path " + path);
         Integer bookId = Integer.valueOf(path.substring(path.lastIndexOf('/') + 1));
-        LOG.info("book delete with id: " + bookId);
-        adminService.delete(bookId);
+        adminService.deleteBookById(bookId);
         return "redirect:books";
     }
 }
