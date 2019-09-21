@@ -1,5 +1,6 @@
 package com.zhitar.library.service.impl;
 
+import com.zhitar.library.annotation.Connectivity;
 import com.zhitar.library.annotation.Transaction;
 import com.zhitar.library.dao.attributedao.AttributeDao;
 import com.zhitar.library.dao.authordao.AuthorDao;
@@ -17,6 +18,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Connectivity
 public class AdminServiceImpl implements AdminService {
 
     private static final Logger LOG = Logger.getLogger(AdminServiceImpl.class);

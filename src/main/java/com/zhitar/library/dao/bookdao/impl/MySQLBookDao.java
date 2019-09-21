@@ -26,11 +26,29 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
     private static final String OWNED_DATE_COLUMN = "owned_date";
     private static final String BOOKCASE_COLUMN = "bookcase";
     private static final String BOOKSHELF_COLUMN = "bookshelf";
+    private static final String ERROR_MESSAGE = "An error occurred during execution";
 
     public MySQLBookDao() {
         LOG.trace("Instantiating " + this.getClass().getName());
     }
 
+    @Override
+    public long count() {
+        LOG.info("Execute count");
+        try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
+                new QueryBuilder().select("count(*)").table(TABLE).build()
+        )) {
+            ResultSet resultSet = statement.executeQuery();
+            long count = 0;
+            while (resultSet.next()) {
+                count = resultSet.getLong(1);
+            }
+            return count;
+        } catch (SQLException e) {
+            LOG.error(ERROR_MESSAGE, e);
+            throw new DaoException(e.getMessage());
+        }
+    }
     @Override
     public Collection<Book> findByNameWithAuthor(String regexName) {
         LOG.info("Execute findByNameWithAuthor with regexName " + regexName);
@@ -47,8 +65,8 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
             ResultSet resultSet = statement.executeQuery();
             return getWithAuthor(resultSet);
         } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            LOG.error(ERROR_MESSAGE, e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -75,8 +93,8 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
             LOG.trace("Saved book " + entity);
             return entity;
         } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            LOG.error(ERROR_MESSAGE, e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -106,8 +124,8 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
             }
             return book;
         } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            LOG.error(ERROR_MESSAGE, e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -130,8 +148,8 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
             ResultSet resultSet = statement.executeQuery();
             return getWithAuthor(resultSet);
         } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            LOG.error(ERROR_MESSAGE, e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -145,8 +163,8 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
             LOG.trace("executeQuery statement");
             return getBooks(resultSet);
         } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            LOG.error(ERROR_MESSAGE, e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -165,8 +183,27 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
             LOG.trace("executeQuery statement");
             return getWithAuthor(resultSet);
         } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            LOG.error(ERROR_MESSAGE, e);
+            throw new DaoException(e.getMessage());
+        }
+    }
+
+    @Override
+    public Collection<Book> findAll(int page) {
+        LOG.info("Execute findAll for page " + page);
+        try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
+                new QueryBuilder().select()
+                        .table(TABLE)
+                        .order(NAME_COLUMN)
+                        .limit(10)
+                        .offset(page * 10)
+                        .build()
+        )) {
+            ResultSet resultSet = statement.executeQuery();
+            return getBooks(resultSet);
+        } catch (SQLException e) {
+            LOG.error(ERROR_MESSAGE, e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -185,8 +222,8 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
             ResultSet resultSet = statement.executeQuery();
             return getBooks(resultSet);
         } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            LOG.error(ERROR_MESSAGE, e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -236,24 +273,25 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
 
     @Override
     protected void update(Book entity, Connection connection) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(
+        try (PreparedStatement statement = connection.prepareStatement(
                 new QueryBuilder().update(TABLE, USER_ID_COLUMN, NAME_COLUMN, OWNED_DATE_COLUMN, BOOKCASE_COLUMN, BOOKSHELF_COLUMN)
-                .whereAssign(ID_COLUMN).build());
-        User owner = entity.getOwner();
-        if (owner != null) {
-            statement.setInt(1, owner.getId());
-        } else {
-            statement.setObject(1, null);
+                .whereAssign(ID_COLUMN).build())) {
+            User owner = entity.getOwner();
+            if (owner != null) {
+                statement.setInt(1, owner.getId());
+            } else {
+                statement.setObject(1, null);
+            }
+            statement.setString(2, entity.getName());
+            statement.setDate(3, owner == null ? null : new Date(entity.getOwnedDate().getTime()));
+            statement.setInt(4, entity.getBookcase());
+            statement.setInt(5, entity.getBookshelf());
+            statement.setInt(6, entity.getId());
+
+            LOG.trace("executeUpdate statement");
+
+            statement.executeUpdate();
         }
-        statement.setString(2, entity.getName());
-        statement.setDate(3, owner == null ? null : new Date(entity.getOwnedDate().getTime()));
-        statement.setInt(4, entity.getBookcase());
-        statement.setInt(5, entity.getBookshelf());
-        statement.setInt(6, entity.getId());
-
-        LOG.trace("executeUpdate statement");
-
-        statement.executeUpdate();
     }
 
     @Override

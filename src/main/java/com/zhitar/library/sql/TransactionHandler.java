@@ -1,40 +1,23 @@
 package com.zhitar.library.sql;
 
-import com.zhitar.library.exception.DataSourceMissedException;
+import com.zhitar.library.connection.JndiDataSource;
 import org.apache.log4j.Logger;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 public class TransactionHandler {
 
+    public static final int WITHOUT_TRANSACTION = 0;
+    public static final int READ_ONLY = 1;
+    public static final int IN_TRANSACTION = 2;
+
     private static final Logger LOG = Logger.getLogger(TransactionHandler.class.getName());
 
-    private static DataSource dataSource;
+    private static DataSource dataSource = new JndiDataSource();
 
     private static ThreadLocal<Connection> connectionHolder = new ThreadLocal<>();
-
-    static {
-        LOG.trace("Define dataSource JNDI");
-        try {
-            Context ctx = new InitialContext();
-            LOG.trace("Instantiate Context " + ctx.getClass().getName());
-
-            LOG.trace("Lookup dataSource by name java:/comp/env/jdbc/library");
-            dataSource = (DataSource) ctx.lookup("java:/comp/env/jdbc/library");
-            if (dataSource == null) {
-                LOG.error("Couldn't find dataSource in context");
-                throw new DataSourceMissedException("Data source not found!");
-            }
-            LOG.info("Defined dataSource successfully " + dataSource.getClass().getName());
-        } catch (Exception e) {
-            LOG.error("An error occurred during defining dataSource", e);
-            throw new DataSourceMissedException("Couldn't define dataSource");
-        }
-    }
 
     public static <T> T transactionExecute(SqlTransaction<T> transaction) {
         LOG.trace("Execute transactionExecute method");
@@ -113,6 +96,19 @@ public class TransactionHandler {
         } catch (SQLException e) {
             LOG.error("An error occurred during connection establishing", e);
             throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> T execute(SqlTransaction<T> transaction, int type) {
+        switch (type) {
+            case IN_TRANSACTION:
+                return transactionExecute(transaction);
+            case READ_ONLY:
+                return readOnlyExecute(transaction);
+            case WITHOUT_TRANSACTION:
+                return execute(transaction);
+                default:
+                    throw new RuntimeException("Bad type value " + type);
         }
     }
 

@@ -9,13 +9,13 @@ import javax.servlet.http.HttpServletResponse;
 
 public class DaoExceptionInterceptor implements ControllerExceptionInterceptor {
     @Override
-    public boolean canHandle(Exception ex) {
+    public boolean canHandle(Throwable ex) {
         return ex.getClass() == DaoException.class;
     }
 
     @Override
-    public String afterException(HttpServletRequest request, HttpServletResponse response, Exception ex) {
-        if (ex.getMessage().contains("unique_user_email")) {
+    public String afterException(HttpServletRequest request, HttpServletResponse response, Throwable e) {
+        if (e.getMessage().contains("unique_user_email")) {
             request.setAttribute("duplicateEmailError", "message.duplicateemail.error");
             request.setAttribute("duplicateEmail", request.getParameter("email"));
             request.setAttribute("register", true);

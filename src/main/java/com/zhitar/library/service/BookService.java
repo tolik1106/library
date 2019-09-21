@@ -16,5 +16,9 @@ public interface BookService {
 
     Collection<Book> findAll();
 
+    Collection<Book> findAll(int page);
+
+    long count();
+
     Collection<Book> findByUser(Integer userId);
 }

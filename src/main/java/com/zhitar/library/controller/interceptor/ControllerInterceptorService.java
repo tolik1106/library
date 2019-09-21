@@ -1,5 +1,6 @@
 package com.zhitar.library.controller.interceptor;
 
+import com.zhitar.library.controller.interceptor.impl.DaoExceptionInterceptor;
 import com.zhitar.library.controller.interceptor.impl.LocaleChangeInterceptor;
 import com.zhitar.library.controller.interceptor.impl.NotFoundExceptionInterceptor;
 
@@ -16,6 +17,7 @@ public class ControllerInterceptorService implements BeforeActionInterceptor, Ex
     {
         beforeInterceptors.add(new LocaleChangeInterceptor());
         exceptionInterceptors.add(new NotFoundExceptionInterceptor());
+        exceptionInterceptors.add(new DaoExceptionInterceptor());
     }
     @Override
     public void beforeAction(HttpServletRequest request, HttpServletResponse response) {
@@ -25,7 +27,7 @@ public class ControllerInterceptorService implements BeforeActionInterceptor, Ex
     }
 
     @Override
-    public String afterException(HttpServletRequest request, HttpServletResponse response, Exception e) {
+    public String afterException(HttpServletRequest request, HttpServletResponse response, Throwable e) {
         for (ControllerExceptionInterceptor exceptionInterceptor : exceptionInterceptors) {
             if (exceptionInterceptor.canHandle(e)) {
                 return exceptionInterceptor.afterException(request, response, e);

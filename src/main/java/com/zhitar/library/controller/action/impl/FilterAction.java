@@ -10,11 +10,15 @@ import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.Collection;
 
 public class FilterAction implements Action {
 
     private static final Logger LOG = Logger.getLogger(FilterAction.class);
+    private static final String NAME = "name";
+    private static final String AUTHOR = "author";
+    private static final String ATTRIBUTE = "attribute";
 
     private BookService bookService = (BookService) Container.getInstance().getBean("bookService");
 
@@ -22,31 +26,42 @@ public class FilterAction implements Action {
     public String execute(HttpServletRequest request, HttpServletResponse response) {
         LOG.info("execute method");
         Collection<Book> books = null;
-        String name = request.getParameter("name");
+        String name = request.getParameter(NAME);
         if (name != null) {
+            removeAttributes(request, AUTHOR, ATTRIBUTE);
+            request.getSession().setAttribute(NAME, name);
             LOG.debug("Request with name: " + name);
             books = bookService.findByNameWithAuthor(name);
             LOG.debug("found books: " + books);
-            request.setAttribute("name", name);
-        } else {
-            String author = request.getParameter("author");
-            if (author != null) {
-                LOG.debug("Request with author: " + author);
-                books = bookService.findByAuthor(author);
-                LOG.debug("found books: " + books);
-                request.setAttribute("author", author);
-            } else {
-                String attribute = request.getParameter("attribute");
-                if (attribute != null) {
-                    LOG.debug("Request with attribute: " + attribute);
-                    request.setAttribute("attribute", attribute);
-                    books = bookService.findByAttribute(attribute);
-                    LOG.debug("found books: " + books);
-                } else {
-                    throw new IllegalArgumentException("Bad parameter for search");
-                }
-            }
+            return processRequest(request, books);
         }
+
+        String author = request.getParameter(AUTHOR);
+        if (author != null) {
+            removeAttributes(request, NAME, ATTRIBUTE);
+            request.getSession().setAttribute(AUTHOR, author);
+            LOG.debug("Request with author: " + author);
+            books = bookService.findByAuthor(author);
+            LOG.debug("found books: " + books);
+            return processRequest(request, books);
+        }
+
+        String attribute = request.getParameter(ATTRIBUTE);
+        if (attribute != null) {
+            removeAttributes(request, NAME, AUTHOR);
+            request.getSession().setAttribute(ATTRIBUTE, attribute);
+            LOG.debug("Request with attribute: " + attribute);
+            books = bookService.findByAttribute(attribute);
+            LOG.debug("found books: " + books);
+            return processRequest(request, books);
+        }
+        if (request.getQueryString().startsWith("lang=")) {
+            return "redirect:books";
+        }
+        throw new IllegalArgumentException("Bad parameter for search");
+    }
+
+    private String processRequest(HttpServletRequest request, Collection<Book> books) {
         User currentUser = (User) request.getSession().getAttribute("user");
         Collection<Book> currentUserBooks = bookService.findByUser(currentUser.getId());
         LOG.debug("Books for user " + currentUser + ": " + currentUserBooks);
@@ -54,5 +69,12 @@ public class FilterAction implements Action {
         request.setAttribute("currentUserBooks", currentUserBooks);
 
         return PropertiesUtil.getValue("app.bookList.page");
+    }
+
+    private void removeAttributes(HttpServletRequest request, String... attributes) {
+        HttpSession session = request.getSession();
+        for (String attribute : attributes) {
+            session.removeAttribute(attribute);
+        }
     }
 }

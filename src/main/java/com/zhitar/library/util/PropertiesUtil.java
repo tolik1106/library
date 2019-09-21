@@ -1,6 +1,6 @@
 package com.zhitar.library.util;
 
-import com.zhitar.library.connection.PropertiesHolder;
+import com.zhitar.library.PropertiesHolder;
 
 public class PropertiesUtil {
     private static final PropertiesHolder holder = new PropertiesHolder();

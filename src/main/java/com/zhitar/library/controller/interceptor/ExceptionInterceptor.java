@@ -5,6 +5,6 @@ import javax.servlet.http.HttpServletResponse;
 
 public interface ExceptionInterceptor {
 
-    String afterException(HttpServletRequest request, HttpServletResponse response, Exception ex);
+    String afterException(HttpServletRequest request, HttpServletResponse response, Throwable e);
 
 }

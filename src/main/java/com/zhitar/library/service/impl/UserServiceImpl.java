@@ -1,5 +1,6 @@
 package com.zhitar.library.service.impl;
 
+import com.zhitar.library.annotation.Connectivity;
 import com.zhitar.library.annotation.Transaction;
 import com.zhitar.library.dao.auxiliarydao.UserRoleDao;
 import com.zhitar.library.dao.roledao.RoleDao;
@@ -14,6 +15,7 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
+@Connectivity
 public class UserServiceImpl implements UserService {
 
     private static final Logger LOG = Logger.getLogger(UserServiceImpl.class);

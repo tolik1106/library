@@ -47,7 +47,7 @@ public class MySQLRoleDao extends AbstractDao<Role, Integer> implements RoleDao 
             return entity;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -78,7 +78,7 @@ public class MySQLRoleDao extends AbstractDao<Role, Integer> implements RoleDao 
             return role;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -103,7 +103,7 @@ public class MySQLRoleDao extends AbstractDao<Role, Integer> implements RoleDao 
             return roles;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -116,14 +116,15 @@ public class MySQLRoleDao extends AbstractDao<Role, Integer> implements RoleDao 
 
     @Override
     protected void update(Role entity, Connection connection) throws SQLException {
-        PreparedStatement updateStatement = connection.prepareStatement(
+        try (PreparedStatement updateStatement = connection.prepareStatement(
                 new QueryBuilder().update(TABLE, ROLE_COLUMN)
                         .whereAssign(ID_COLUMN)
                         .build()
-        );
-        updateStatement.setString(1, entity.getRole());
-        updateStatement.setInt(2, entity.getId());
-        updateStatement.executeUpdate();
+        )) {
+            updateStatement.setString(1, entity.getRole());
+            updateStatement.setInt(2, entity.getId());
+            updateStatement.executeUpdate();
+        }
     }
 
     @Override

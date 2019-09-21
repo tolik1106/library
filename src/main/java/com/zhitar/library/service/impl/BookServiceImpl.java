@@ -1,5 +1,6 @@
 package com.zhitar.library.service.impl;
 
+import com.zhitar.library.annotation.Connectivity;
 import com.zhitar.library.annotation.Transaction;
 import com.zhitar.library.dao.attributedao.AttributeDao;
 import com.zhitar.library.dao.authordao.AuthorDao;
@@ -17,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Connectivity
 public class BookServiceImpl implements BookService {
 
     private static final Logger LOG = Logger.getLogger(BookServiceImpl.class);
@@ -117,6 +119,28 @@ public class BookServiceImpl implements BookService {
     public Collection<Book> findAll() {
         LOG.info("findAll");
         return bookDAO.findAllWithAuthor();
+    }
+
+    @Transaction(readOnly = true)
+    @Override
+    public Collection<Book> findAll(int page) {
+        long count = bookDAO.count();
+        if ((page < 0) || (page > ((count - 1) / 10))) {
+            throw new IllegalArgumentException("Wrong page number");
+        }
+        Collection<Book> books = bookDAO.findAll(page);
+
+        for (Book book : books) {
+            List<BookAuthor> bookAuthors = bookAuthorDAO.findByBookId(book.getId());
+            List<Author> authors = authorDAO.findById(bookAuthors.stream().map(BookAuthor::getAuthorId).collect(Collectors.toList()));
+            book.setAuthors(authors);
+        }
+        return books;
+    }
+
+    @Override
+    public long count() {
+        return bookDAO.count();
     }
 
     @Transaction(readOnly = true)

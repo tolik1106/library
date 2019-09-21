@@ -1,5 +1,6 @@
 package com.zhitar.library.annotation;
 
+import com.zhitar.library.exception.TransactionException;
 import com.zhitar.library.sql.TransactionHandler;
 
 import java.lang.reflect.InvocationHandler;
@@ -12,15 +13,12 @@ public class TransactionProxyCreator {
 
     @SuppressWarnings("unchecked")
     public static <T> T createProxy(T service) {
-        Method[] methods = service.getClass().getMethods();
-        for (Method method : methods) {
-            if (method.getAnnotation(Transaction.class) != null) {
-                return (T) Proxy.newProxyInstance(
-                        service.getClass().getClassLoader(),
-                        service.getClass().getInterfaces(),
-                        new TransactionInvocationHandler(service)
-                );
-            }
+        if (service.getClass().getAnnotation(Connectivity.class) != null) {
+            return (T) Proxy.newProxyInstance(
+                    service.getClass().getClassLoader(),
+                    service.getClass().getInterfaces(),
+                    new TransactionInvocationHandler(service)
+            );
         }
         return service;
     }
@@ -37,37 +35,23 @@ public class TransactionProxyCreator {
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             Method realMethod = target.getClass().getMethod(method.getName(), method.getParameterTypes());
             Transaction annotation = realMethod.getAnnotation(Transaction.class);
+            int type = TransactionHandler.WITHOUT_TRANSACTION;
 
             if (annotation != null) {
                 boolean readOnly = annotation.readOnly();
                 if (readOnly) {
-                    return TransactionHandler.readOnlyExecute(() -> {
-                        try {
-                            return realMethod.invoke(target, args);
-                        } catch (IllegalAccessException | InvocationTargetException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    });
+                    type = TransactionHandler.READ_ONLY;
                 } else {
-                    return TransactionHandler.transactionExecute(() -> {
-                        try {
-                            return realMethod.invoke(target, args);
-                        } catch (IllegalAccessException | InvocationTargetException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    });
+                    type = TransactionHandler.IN_TRANSACTION;
                 }
             }
             return TransactionHandler.execute(() -> {
                 try {
                     return realMethod.invoke(target, args);
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
+                    throw new TransactionException(e);
                 }
-                return null;
-            });
+            }, type);
         }
     }
 }

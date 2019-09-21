@@ -48,7 +48,7 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
             LOG.trace("Saved user " + entity);
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
         return entity;
     }
@@ -75,7 +75,7 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
             }
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
         return user;
     }
@@ -104,7 +104,7 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
             return user;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -126,7 +126,7 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
             return users;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -153,7 +153,7 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
             return usersMap.values();
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -188,17 +188,18 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
 
     @Override
     protected void update(User entity, Connection connection) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(
+        try (PreparedStatement statement = connection.prepareStatement(
                 new QueryBuilder()
                         .update(TABLE, NAME_COLUMN, EMAIL_COLUMN, PHONE_COLUMN)
                         .whereAssign(ID_COLUMN)
                         .build()
-        );
-        statement.setString(1, entity.getName());
-        statement.setString(2, entity.getEmail());
-        statement.setString(3, entity.getPhone());
-        statement.setInt(5, entity.getId());
-        statement.executeUpdate();
+        )) {
+            statement.setString(1, entity.getName());
+            statement.setString(2, entity.getEmail());
+            statement.setString(3, entity.getPhone());
+            statement.setInt(5, entity.getId());
+            statement.executeUpdate();
+        }
     }
 
     @Override

@@ -10,13 +10,13 @@ import javax.servlet.http.HttpServletResponse;
 public class NotFoundExceptionInterceptor implements ControllerExceptionInterceptor {
 
     @Override
-    public boolean canHandle(Exception ex) {
+    public boolean canHandle(Throwable ex) {
         return ex.getClass() == NotFoundException.class;
     }
 
     @Override
-    public String afterException(HttpServletRequest request, HttpServletResponse response, Exception ex) {
-        String message = ex.getMessage();
+    public String afterException(HttpServletRequest request, HttpServletResponse response, Throwable e) {
+        String message = e.getMessage();
         String view = null;
         if (message.contains("email")) {
             request.setAttribute("error", message);
@@ -24,7 +24,7 @@ public class NotFoundExceptionInterceptor implements ControllerExceptionIntercep
             view = PropertiesUtil.getValue("app.login.page");
         } else if (message.contains("notfound")) {
             view = PropertiesUtil.getValue("app.bookList.page");
-            request.setAttribute("error", ex.getMessage());
+            request.setAttribute("error", e.getMessage());
         }
         return view;
     }

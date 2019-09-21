@@ -1,4 +1,4 @@
-package com.zhitar.library.connection;
+package com.zhitar.library;
 
 import org.apache.log4j.Logger;
 

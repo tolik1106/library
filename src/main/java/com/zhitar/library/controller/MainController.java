@@ -3,6 +3,7 @@ package com.zhitar.library.controller;
 import com.zhitar.library.controller.action.Action;
 import com.zhitar.library.controller.action.ActionFactory;
 import com.zhitar.library.controller.interceptor.ControllerInterceptorService;
+import com.zhitar.library.util.ExceptionUtil;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletException;
@@ -43,8 +44,9 @@ public class MainController extends HttpServlet {
             action = ActionFactory.getAction(req);
             view = action.execute(req, resp);
         } catch (Exception e) {
-            view = interceptorService.afterException(req, resp, e);
+            view = interceptorService.afterException(req, resp, ExceptionUtil.getRootCause(e));
             if (view == null) {
+                req.getSession().setAttribute("exceptionMessage", ExceptionUtil.getRootCause(e).getMessage());
                 view = "redirect:error";
             }
         }

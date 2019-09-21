@@ -41,7 +41,7 @@ public class MySQLBookAttributeDao implements BookAttributeDAO {
             return bookAttribute;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -65,7 +65,7 @@ public class MySQLBookAttributeDao implements BookAttributeDAO {
             return attributes;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -92,7 +92,7 @@ public class MySQLBookAttributeDao implements BookAttributeDAO {
             return result;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -107,7 +107,7 @@ public class MySQLBookAttributeDao implements BookAttributeDAO {
             return getBookAttributes(resultSet);
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 

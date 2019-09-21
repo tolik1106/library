@@ -4,6 +4,6 @@
 <jsp:include page="fragments/headTag.jsp"/>
 <body>
 <jsp:include page="fragments/bodyHeader.jsp"/>
-<h2 style="text-align: center;"><strong>Sorry, this page isn't available.</strong></h2>
+<h2 style="text-align: center;"><strong>${cause}</strong></h2>
 </body>
 </html>

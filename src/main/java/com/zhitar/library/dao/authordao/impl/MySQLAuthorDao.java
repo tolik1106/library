@@ -48,7 +48,7 @@ public class MySQLAuthorDao extends AbstractDao<Author, Integer> implements Auth
             return entity;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -83,7 +83,7 @@ public class MySQLAuthorDao extends AbstractDao<Author, Integer> implements Auth
             return authors;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -110,7 +110,7 @@ public class MySQLAuthorDao extends AbstractDao<Author, Integer> implements Auth
             return author;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -139,7 +139,7 @@ public class MySQLAuthorDao extends AbstractDao<Author, Integer> implements Auth
             return authors;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -164,7 +164,7 @@ public class MySQLAuthorDao extends AbstractDao<Author, Integer> implements Auth
             return author;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -187,7 +187,7 @@ public class MySQLAuthorDao extends AbstractDao<Author, Integer> implements Auth
                 return authors;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -200,12 +200,13 @@ public class MySQLAuthorDao extends AbstractDao<Author, Integer> implements Auth
 
     @Override
     protected void update(Author entity, Connection connection) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(
+        try (PreparedStatement statement = connection.prepareStatement(
                 new QueryBuilder().update(TABLE, NAME_COLUMN).whereAssign(ID_COLUMN).build()
-        );
-        statement.setString(1, entity.getName());
-        statement.setInt(2, entity.getId());
-        statement.executeUpdate();
+        )) {
+            statement.setString(1, entity.getName());
+            statement.setInt(2, entity.getId());
+            statement.executeUpdate();
+        }
     }
 
     @Override

@@ -40,7 +40,7 @@ public class MySQLUserRoleDao implements UserRoleDao {
             return userRole;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -64,7 +64,7 @@ public class MySQLUserRoleDao implements UserRoleDao {
             return userRoleList;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -92,7 +92,7 @@ public class MySQLUserRoleDao implements UserRoleDao {
             return getUserRoles(resultSet);
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 

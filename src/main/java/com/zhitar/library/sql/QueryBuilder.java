@@ -27,6 +27,7 @@ public class QueryBuilder {
     private static final String ORDER_BY = " ORDER BY ";
     private static final String REGEXP = " REGEXP ";
     private static final String IN = " IN ";
+    private static final String LIMIT = " LIMIT ";
     private StringBuilder builder = new StringBuilder();
 
     public String build() {
@@ -145,6 +146,16 @@ public class QueryBuilder {
 
     public QueryBuilder table(String tableName) {
         builder.append(SPACE).append(tableName).append(SPACE);
+        return this;
+    }
+
+    public QueryBuilder limit(int limit) {
+        builder.append(LIMIT).append(limit).append(SPACE);
+        return this;
+    }
+
+    public QueryBuilder offset(int offset) {
+        builder.append(" OFFSET ").append(offset).append(SPACE);
         return this;
     }
 }

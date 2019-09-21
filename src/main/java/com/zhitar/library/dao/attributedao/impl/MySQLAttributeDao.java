@@ -35,9 +35,6 @@ public class MySQLAttributeDao extends AbstractDao<Attribute, Integer> implement
                 Statement.RETURN_GENERATED_KEYS
         )) {
             statement.setString(1, entity.getName());
-
-            LOG.trace("executeUpdate statement");
-
             ResultSet generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next()) {
                 int key = generatedKeys.getInt(1);
@@ -48,7 +45,7 @@ public class MySQLAttributeDao extends AbstractDao<Attribute, Integer> implement
             return entity;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -79,7 +76,7 @@ public class MySQLAttributeDao extends AbstractDao<Attribute, Integer> implement
             return attributes;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -109,7 +106,7 @@ public class MySQLAttributeDao extends AbstractDao<Attribute, Integer> implement
             return attribute;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -139,7 +136,7 @@ public class MySQLAttributeDao extends AbstractDao<Attribute, Integer> implement
             return attributes;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -164,7 +161,7 @@ public class MySQLAttributeDao extends AbstractDao<Attribute, Integer> implement
             return bookAttribute;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -185,7 +182,7 @@ public class MySQLAttributeDao extends AbstractDao<Attribute, Integer> implement
                 return attributes;
         } catch (SQLException e) {
             LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage(), e);
+            throw new DaoException(e.getMessage());
         }
     }
 
@@ -198,11 +195,12 @@ public class MySQLAttributeDao extends AbstractDao<Attribute, Integer> implement
 
     @Override
     protected void update(Attribute entity, Connection connection) throws SQLException {
-        PreparedStatement updateStatement = connection.prepareStatement(
+        try (PreparedStatement updateStatement = connection.prepareStatement(
                 new QueryBuilder().update(TABLE, NAME_COLUMN).whereAssign(ID_COLUMN).build()
-        );
-        updateStatement.setString(1, entity.getName());
-        updateStatement.executeUpdate();
+        )) {
+            updateStatement.setString(1, entity.getName());
+            updateStatement.executeUpdate();
+        }
     }
 
     @Override
