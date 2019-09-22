@@ -5,7 +5,11 @@ import com.zhitar.library.domain.BookAttribute;
 
 import java.util.List;
 
-public interface BookAttributeDAO {
+/**
+ * Manage auxiliary {@link BookAttribute} object that
+ * represent intermediate table for book and attribute
+ */
+public interface BookAttributeDao {
 
     BookAttribute save(BookAttribute bookAttribute);
 

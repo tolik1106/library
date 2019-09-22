@@ -5,6 +5,9 @@ import com.zhitar.library.domain.Attribute;
 
 import java.util.List;
 
+/**
+ * Manage {@link Attribute} entity
+ */
 public interface AttributeDao extends GenericDao<Attribute, Integer> {
     List<Attribute> save(List<Attribute> attributes);
 

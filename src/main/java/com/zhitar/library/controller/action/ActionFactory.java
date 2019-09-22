@@ -31,6 +31,8 @@ public class ActionFactory {
         requestActionMap.put(getValue("app.save.action"), new BookSaveAction());
         requestActionMap.put(getValue("app.readers.action"), new ReadersAction());
         requestActionMap.put(getValue("app.notfound.action"), new NotFoundAction());
+        requestActionMap.put(getValue("app.give.action"), new GiveBookAction());
+        requestActionMap.put(getValue("app.cancel.order.action"), new BookCancelOrderAction());
 
         pathVariablesList.add(getValue("app.take.action"));
         pathVariablesList.add(getValue("app.delete.action"));

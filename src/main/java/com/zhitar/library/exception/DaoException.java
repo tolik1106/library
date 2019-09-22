@@ -1,5 +1,8 @@
 package com.zhitar.library.exception;
 
+/**
+ * Main dao layer exception
+ */
 public class DaoException extends RuntimeException {
 
     public DaoException() {

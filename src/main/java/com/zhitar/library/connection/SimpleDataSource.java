@@ -10,6 +10,11 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
+/**
+ * Simple implementation of the standard JDBC {@link DataSource} interface.
+ * uses {@link java.sql.DriverManager}, and
+ * returning a new {@link java.sql.Connection} from every {@code getConnection} call.
+ */
 public class SimpleDataSource implements DataSource {
 
     private String dbUrl;
@@ -17,6 +22,10 @@ public class SimpleDataSource implements DataSource {
     private String dbPassword;
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(SimpleDataSource.class);
 
+    /**
+     * Create a new SimpleDataSource with parameters that uses
+     * in mysql.properties file
+     */
     public SimpleDataSource() {
         dbUrl = PropertiesUtil.getValue("mysql.url");
         LOG.debug("dbUrl: " + dbUrl);
@@ -26,6 +35,13 @@ public class SimpleDataSource implements DataSource {
         LOG.debug("dbPassword: " + dbPassword);
     }
 
+    /**
+     * Create a new SimpleDataSource with standard DriverManager parameters.
+     * @param url the JDBC URL to use for accessing the DriverManager
+     * @param username the JDBC username to use for accessing the DriverManager
+     * @param password the JDBC password to use for accessing the DriverManager
+     * @see java.sql.DriverManager#getConnection(String, String, String)
+     */
     public SimpleDataSource(String url, String username, String password) {
         this.dbUrl = url;
         this.dbUser = username;

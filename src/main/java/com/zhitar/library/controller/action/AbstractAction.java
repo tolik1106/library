@@ -3,6 +3,9 @@ package com.zhitar.library.controller.action;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * This class contains logic for POST and GET http request
+ */
 public abstract class AbstractAction implements Action {
 
     private static final String GET_METHOD = "GET";

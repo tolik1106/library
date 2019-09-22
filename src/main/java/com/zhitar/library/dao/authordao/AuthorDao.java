@@ -5,6 +5,9 @@ import com.zhitar.library.domain.Author;
 
 import java.util.List;
 
+/**
+ * Manage {@link Author} entity
+ */
 public interface AuthorDao extends GenericDao<Author, Integer> {
     List<Author> save(List<Author> authors);
 

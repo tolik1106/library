@@ -21,13 +21,13 @@
                             <c:forEach items="${user.books}" var="book">
                                 <jsp:useBean id="book" type="com.zhitar.library.domain.Book"/>
                                 <li>${book.name}&emsp;
-                                    <form style="display: inline-block;" method="post" name="returnBook" action="admin/readers">
-                                    <input type="hidden" name="bookId" value="${book.id}">
-                                    <input type="hidden" name="userId" value="${user.id}">
-                                        <fmt:message key="message.book.return" var="returnMessage"/>
-                                    <input type="submit" class="btn btn-outline-success btn-sm" value="${returnMessage}">
-                                </form>
-                            </li>
+                                    <form style="display: inline-block;" method="post" action="${book.ordered ? 'admin/give' : 'admin/readers'}">
+                                        <input type="hidden" name="bookId" value="${book.id}">
+                                        <input type="hidden" name="userId" value="${user.id}">
+                                        <fmt:message key="${book.ordered ? 'message.book.give' : 'message.book.return'}" var="submitMessage"/>
+                                        <input type="submit" class="btn ${book.ordered ? 'btn-primary' : 'btn-outline-success'} btn-sm" value="${submitMessage}">
+                                    </form>
+                                </li>
                             </c:forEach>
                         </ol>
                     </c:forEach>

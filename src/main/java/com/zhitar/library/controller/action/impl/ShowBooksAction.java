@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
 
+import static com.zhitar.library.util.BookActionUtil.checkIsDebtor;
+
 public class ShowBooksAction implements Action {
 
     private static final Logger LOG = Logger.getLogger(ShowBooksAction.class);
@@ -28,6 +30,8 @@ public class ShowBooksAction implements Action {
         LOG.debug("get user from session: " + currentUser);
         Collection<Book> currentUserBooks = bookService.findByUser(currentUser.getId());
         LOG.debug("found user books: " + currentUserBooks);
+
+        checkIsDebtor(request, currentUserBooks);
         request.setAttribute("books", books);
         request.setAttribute("currentUserBooks", currentUserBooks);
         long count = bookService.count();

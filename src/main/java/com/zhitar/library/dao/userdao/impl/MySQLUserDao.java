@@ -134,7 +134,7 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
     public Collection<User> findAllWithBooks() {
         LOG.info("Execute findAllWithBooks");
         try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
-                new QueryBuilder().select("u.id", "u.name", "u.email", "u.phone", "b.id", "b.name", "b.owned_date", "b.bookcase", "b.bookshelf")
+                new QueryBuilder().select("u.id", "u.name", "u.email", "u.phone", "b.id", "b.name", "b.owned_date", "b.bookcase", "b.bookshelf", "b.ordered")
                         .table("users u")
                         .join("INNER", "book b", "u.id", "b.user_id")
                         .order("u.name")
@@ -164,6 +164,7 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
         book.setOwnedDate(resultSet.getDate(7));
         book.setBookcase(resultSet.getInt(8));
         book.setBookshelf(resultSet.getInt(9));
+        book.setOrdered(resultSet.getBoolean(10));
         user.getBooks().add(book);
         return user;
     }

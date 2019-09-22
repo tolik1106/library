@@ -4,8 +4,8 @@ import com.zhitar.library.annotation.Connectivity;
 import com.zhitar.library.annotation.Transaction;
 import com.zhitar.library.dao.attributedao.AttributeDao;
 import com.zhitar.library.dao.authordao.AuthorDao;
-import com.zhitar.library.dao.auxiliarydao.BookAttributeDAO;
-import com.zhitar.library.dao.auxiliarydao.BookAuthorDAO;
+import com.zhitar.library.dao.auxiliarydao.BookAttributeDao;
+import com.zhitar.library.dao.auxiliarydao.BookAuthorDao;
 import com.zhitar.library.dao.bookdao.BookDao;
 import com.zhitar.library.dao.userdao.UserDao;
 import com.zhitar.library.domain.*;
@@ -27,11 +27,11 @@ public class BookServiceImpl implements BookService {
     private BookDao bookDAO;
     private AttributeDao attributeDAO;
     private UserDao userDAO;
-    private BookAuthorDAO bookAuthorDAO;
-    private BookAttributeDAO bookAttributeDAO;
+    private BookAuthorDao bookAuthorDAO;
+    private BookAttributeDao bookAttributeDAO;
 
 
-    public BookServiceImpl(AuthorDao authorDAO, BookDao bookDAO, AttributeDao attributeDAO, UserDao userDAO, BookAuthorDAO bookAuthorDAO, BookAttributeDAO bookAttributeDAO) {
+    public BookServiceImpl(AuthorDao authorDAO, BookDao bookDAO, AttributeDao attributeDAO, UserDao userDAO, BookAuthorDao bookAuthorDAO, BookAttributeDao bookAttributeDAO) {
         this.authorDAO = authorDAO;
         this.bookDAO = bookDAO;
         this.attributeDAO = attributeDAO;
@@ -110,6 +110,7 @@ public class BookServiceImpl implements BookService {
         }
         book.setOwner(user);
         book.setOwnedDate(new Date());
+        book.setOrdered(true);
 
         return bookDAO.update(book);
     }
@@ -148,5 +149,29 @@ public class BookServiceImpl implements BookService {
     public Collection<Book> findByUser(Integer userId) {
         LOG.info("findByUser with id: " + userId);
         return bookDAO.findByUser(userId);
+    }
+
+    @Transaction
+    @Override
+    public Book cancelOrder(Integer bookId, Integer userId) {
+        LOG.info("cancelOrder for book " + bookId + " and user: " + userId);
+        User user = userDAO.findById(userId);
+        if (user == null) {
+            LOG.error("User with id '" + userId + "' not found");
+            throw new NotFoundException("User with id '" + userId + "' not found");
+        }
+        Book book = bookDAO.findById(bookId);
+        if (book == null) {
+            LOG.error("Book with id '" + bookId + "' not found");
+            throw new NotFoundException("message.notfound.error");
+        }
+        if (!book.getOrdered()) {
+            LOG.error("This book isn't ordered");
+            throw new NotFoundException("This book isn't ordered");
+        }
+        book.setOwner(null);
+        book.setOwnedDate(null);
+        book.setOrdered(false);
+        return bookDAO.update(book);
     }
 }

@@ -1,5 +1,6 @@
 package com.zhitar.library.service;
 
+import com.zhitar.library.annotation.Transaction;
 import com.zhitar.library.domain.Book;
 import com.zhitar.library.domain.User;
 
@@ -12,6 +13,8 @@ public interface AdminService {
     Book findBookById(Integer id);
 
     Book save(Book book);
+
+    Book giveBook(Integer userId, Integer bookId);
 
     Book update(Book book);
 

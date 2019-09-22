@@ -1,6 +1,6 @@
 package com.zhitar.library.dao.auxiliarydao.impl;
 
-import com.zhitar.library.dao.auxiliarydao.BookAttributeDAO;
+import com.zhitar.library.dao.auxiliarydao.BookAttributeDao;
 import com.zhitar.library.domain.BookAttribute;
 import com.zhitar.library.exception.DaoException;
 import com.zhitar.library.sql.QueryBuilder;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MySQLBookAttributeDao implements BookAttributeDAO {
+public class MySQLBookAttributeDao implements BookAttributeDao {
 
     private static final Logger LOG = Logger.getLogger(MySQLBookAttributeDao.class.getName());
 

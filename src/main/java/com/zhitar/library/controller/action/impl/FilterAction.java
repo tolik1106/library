@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Collection;
 
+import static com.zhitar.library.util.BookActionUtil.checkIsDebtor;
+
 public class FilterAction implements Action {
 
     private static final Logger LOG = Logger.getLogger(FilterAction.class);
@@ -67,6 +69,8 @@ public class FilterAction implements Action {
         LOG.debug("Books for user " + currentUser + ": " + currentUserBooks);
         request.setAttribute("books", books);
         request.setAttribute("currentUserBooks", currentUserBooks);
+
+        checkIsDebtor(request, currentUserBooks);
 
         return PropertiesUtil.getValue("app.bookList.page");
     }

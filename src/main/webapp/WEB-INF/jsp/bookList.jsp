@@ -78,10 +78,9 @@
                         <jsp:useBean id="book" type="com.zhitar.library.domain.Book"/>
                         <tr>
                             <td>${book.name}</td>
-
                             <td>
                                 <c:forEach items="${book.authors}" var="author" varStatus="loop">
-                                    ${author.name} ${!loop.last ? ',' : ''}
+                                    ${author.name} ${!loop.last ? ', ' : ''}
                                 </c:forEach>
                             </td>
                             <c:if test="${sessionScope.user.hasRole('ADMIN')}">
@@ -90,6 +89,11 @@
                             </c:if>
                             <td>
                                 <c:choose>
+                                    <c:when test="${debtor && (book.ownedDate == null)}">
+                                        <strong>
+                                            <fmt:message key="message.book.debtor"/>
+                                        </strong>
+                                    </c:when>
                                     <c:when test="${book.ownedDate == null}">
                                         <a href="take/${book.id}"><strong><fmt:message
                                                 key="message.book.take"/></strong></a>
@@ -100,20 +104,34 @@
                                         </strong>
                                     </c:when>
                                     <c:otherwise>
-                                        <strong>
-                                            <jsp:useBean id="now" class="java.util.Date"/>
+                                        <c:set var="contains" value="false"/>
+                                        <c:if test="${fn:contains(currentUserBooks, book)}">
+                                            <c:set var="contains" value="true"/>
+                                            <c:if test="${book.ordered}">
+                                                <strong>
+                                                    <a href="books/cancel?id=${book.id}">
+                                                        <fmt:message key="message.book.cancel"/>
+                                                    </a>
+                                                </strong>
+                                            </c:if>
+                                            <c:if test="${!book.ordered}">
+                                            <strong>
+                                                <jsp:useBean id="now" class="java.util.Date"/>
 
-                                            <fmt:parseNumber
-                                                    value="${(now.time - book.ownedDate.time) / (1000 * 60 * 60 * 24)}"
-                                                    var="diff" integerOnly="true"/>
-                                            <fmt:message key="message.book.toreturn" var="bookToReturn">
-                                                <fmt:param value="${30 - diff}"/>
-                                            </fmt:message>
-
-                                            <fmt:message key="message.book.unavailable" var="bookUnavailable"/>
-                                            <c:out value="${fn:contains(currentUserBooks, book) ?
-                                            bookToReturn : bookUnavailable}"/>
-                                        </strong>
+                                                <fmt:parseNumber
+                                                        value="${(now.time - book.ownedDate.time) / (1000 * 60 * 60 * 24)}"
+                                                        var="diff" integerOnly="true"/>
+                                                <fmt:message key="message.book.toreturn">
+                                                    <fmt:param value="${30 - diff}"/>
+                                                </fmt:message>
+                                            </strong>
+                                            </c:if>
+                                        </c:if>
+                                        <c:if test="${!contains}">
+                                            <strong>
+                                            <fmt:message key="message.book.unavailable"/>
+                                            </strong>
+                                        </c:if>
                                     </c:otherwise>
                                 </c:choose>
                             </td>

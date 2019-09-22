@@ -6,6 +6,9 @@ import com.zhitar.library.domain.Book;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Manage {@link Book} entity
+ */
 public interface BookDao extends GenericDao<Book, Integer> {
 
     Collection<Book> findById(List<Integer> ids);

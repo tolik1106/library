@@ -26,6 +26,7 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
     private static final String OWNED_DATE_COLUMN = "owned_date";
     private static final String BOOKCASE_COLUMN = "bookcase";
     private static final String BOOKSHELF_COLUMN = "bookshelf";
+    private static final String ORDERED_COLUMN = "ordered";
     private static final String ERROR_MESSAGE = "An error occurred during execution";
 
     public MySQLBookDao() {
@@ -53,7 +54,7 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
     public Collection<Book> findByNameWithAuthor(String regexName) {
         LOG.info("Execute findByNameWithAuthor with regexName " + regexName);
         try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
-                new QueryBuilder().select("b.id", "b.user_id", "b.name", "b.owned_date", "b.bookcase", "b.bookshelf", "a.id", "a.name")
+                new QueryBuilder().select("b.id", "b.user_id", "b.name", "b.owned_date", "b.bookcase", "b.bookshelf", "b.ordered", "a.id", "a.name")
                         .table("book b")
                         .join("INNER", "book_author ba", "b.id", "ba.book_id")
                         .join("INNER", "author a", "ba.author_id", "a.id")
@@ -133,7 +134,7 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
     public Collection<Book> findById(List<Integer> ids) {
         LOG.info("Execute findById with ids " + ids);
         try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
-                new QueryBuilder().select("b.id", "b.user_id", "b.name", "b.owned_date", "b.bookcase", "b.bookshelf", "a.id", "a.name")
+                new QueryBuilder().select("b.id", "b.user_id", "b.name", "b.owned_date", "b.bookcase", "b.bookshelf", "b.ordered", "a.id", "a.name")
                 .table("book b")
                 .join("INNER", "book_author ba", "b.id", "ba.book_id")
                 .join("INNER", "author a", "ba.author_id", "a.id")
@@ -158,7 +159,7 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
         LOG.info("Execute findAll");
         try (Statement statement = TransactionHandler.getConnection().createStatement();
              ResultSet resultSet = statement.executeQuery(
-                     new QueryBuilder().select().table(TABLE).build()
+                     new QueryBuilder().select().table(TABLE).order(NAME_COLUMN).build()
              )) {
             LOG.trace("executeQuery statement");
             return getBooks(resultSet);
@@ -173,7 +174,7 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
         LOG.info("Execute findAllWithAuthor");
         try (Statement statement = TransactionHandler.getConnection().createStatement();
              ResultSet resultSet = statement.executeQuery(
-                     new QueryBuilder().select("b.id", "b.user_id", "b.name", "b.owned_date", "b.bookcase", "b.bookshelf", "a.id", "a.name")
+                     new QueryBuilder().select("b.id", "b.user_id", "b.name", "b.owned_date", "b.bookcase", "b.bookshelf", "b.ordered", "a.id", "a.name")
                      .table("book b")
                      .join("INNER", "book_author ba", "b.id", "ba.book_id")
                      .join("INNER", "author a", "ba.author_id", "a.id")
@@ -241,8 +242,8 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
 
     private Book setAuthor(Book book, ResultSet resultSet) throws SQLException {
         Author author = new Author();
-        author.setId(resultSet.getInt(7));
-        author.setName(resultSet.getString(8));
+        author.setId(resultSet.getInt(8));
+        author.setName(resultSet.getString(9));
         book.getAuthors().add(author);
         LOG.trace("Set Author " + author + " for book " + book);
 
@@ -267,6 +268,7 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
         book.setOwnedDate(resultSet.getDate(OWNED_DATE_COLUMN));
         book.setBookcase(resultSet.getInt(BOOKCASE_COLUMN));
         book.setBookshelf(resultSet.getInt(BOOKSHELF_COLUMN));
+        book.setOrdered(resultSet.getBoolean(ORDERED_COLUMN));
         LOG.trace("Retrieved book " + book);
         return book;
     }
@@ -274,7 +276,7 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
     @Override
     protected void update(Book entity, Connection connection) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(
-                new QueryBuilder().update(TABLE, USER_ID_COLUMN, NAME_COLUMN, OWNED_DATE_COLUMN, BOOKCASE_COLUMN, BOOKSHELF_COLUMN)
+                new QueryBuilder().update(TABLE, USER_ID_COLUMN, NAME_COLUMN, OWNED_DATE_COLUMN, BOOKCASE_COLUMN, BOOKSHELF_COLUMN, ORDERED_COLUMN)
                 .whereAssign(ID_COLUMN).build())) {
             User owner = entity.getOwner();
             if (owner != null) {
@@ -286,7 +288,8 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
             statement.setDate(3, owner == null ? null : new Date(entity.getOwnedDate().getTime()));
             statement.setInt(4, entity.getBookcase());
             statement.setInt(5, entity.getBookshelf());
-            statement.setInt(6, entity.getId());
+            statement.setBoolean(6, entity.getOrdered());
+            statement.setInt(7, entity.getId());
 
             LOG.trace("executeUpdate statement");
 

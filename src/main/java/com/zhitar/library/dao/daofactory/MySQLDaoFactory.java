@@ -4,8 +4,8 @@ import com.zhitar.library.dao.attributedao.AttributeDao;
 import com.zhitar.library.dao.attributedao.impl.MySQLAttributeDao;
 import com.zhitar.library.dao.authordao.AuthorDao;
 import com.zhitar.library.dao.authordao.impl.MySQLAuthorDao;
-import com.zhitar.library.dao.auxiliarydao.BookAttributeDAO;
-import com.zhitar.library.dao.auxiliarydao.BookAuthorDAO;
+import com.zhitar.library.dao.auxiliarydao.BookAttributeDao;
+import com.zhitar.library.dao.auxiliarydao.BookAuthorDao;
 import com.zhitar.library.dao.auxiliarydao.UserRoleDao;
 import com.zhitar.library.dao.auxiliarydao.impl.MySQLBookAttributeDao;
 import com.zhitar.library.dao.auxiliarydao.impl.MySQLBookAuthorDao;
@@ -57,13 +57,13 @@ public class MySQLDaoFactory extends AbstractDAOFactory {
     }
 
     @Override
-    public BookAttributeDAO getBookAttributeDAO() {
+    public BookAttributeDao getBookAttributeDAO() {
         LOG.trace("Execute getBookAttributeDAO method");
         return new MySQLBookAttributeDao();
     }
 
     @Override
-    public BookAuthorDAO getBookAuthorDAO() {
+    public BookAuthorDao getBookAuthorDAO() {
         LOG.trace("Execute getBookAuthorDAO method");
         return new MySQLBookAuthorDao();
     }

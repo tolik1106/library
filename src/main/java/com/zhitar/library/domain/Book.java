@@ -25,6 +25,8 @@ public class Book extends AbstractEntity<Integer> {
     @Range(message = "message.bookshelf.error")
     private Integer bookshelf;
 
+    private Boolean ordered = false;
+
     public Book() {
     }
 
@@ -92,6 +94,14 @@ public class Book extends AbstractEntity<Integer> {
         this.bookshelf = bookshelf;
     }
 
+    public Boolean getOrdered() {
+        return ordered;
+    }
+
+    public void setOrdered(Boolean ordered) {
+        this.ordered = ordered;
+    }
+
     @Override
     public String toString() {
         return "Book{" +
@@ -100,6 +110,7 @@ public class Book extends AbstractEntity<Integer> {
                 ", ownedDate=" + ownedDate +
                 ", bookcase=" + bookcase +
                 ", bookshelf=" + bookshelf +
+                ", ordered=" + ordered +
                 '}';
     }
 }

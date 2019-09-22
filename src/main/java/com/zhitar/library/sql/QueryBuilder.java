@@ -2,6 +2,9 @@ package com.zhitar.library.sql;
 
 import org.apache.log4j.Logger;
 
+/**
+ * Simple sql query builder
+ */
 public class QueryBuilder {
 
     private static final Logger LOG = Logger.getLogger(QueryBuilder.class.getName());
@@ -30,11 +33,20 @@ public class QueryBuilder {
     private static final String LIMIT = " LIMIT ";
     private StringBuilder builder = new StringBuilder();
 
+    /**
+     * Builds sql query
+     * @return sql query
+     */
     public String build() {
         LOG.debug("Building query: " + builder.toString());
         return builder.toString();
     }
 
+    /**
+     * add SELECT params coma separated FROM statement to {@link QueryBuilder#builder}
+     * @param params columns to execute
+     * @return this QueryBuilder
+     */
     public QueryBuilder select(String... params) {
         if (params.length == 0) {
             builder.append(SELECT_ALL);
@@ -51,6 +63,12 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * add INSERT INTO tableName(params) VALUES(...) to {@link QueryBuilder#builder}
+     * @param tableName table to insert
+     * @param params params to insert
+     * @return this QueryBuilder
+     */
     public QueryBuilder insert(String tableName, String... params) {
         builder.append(INSERT)
                 .append(tableName)
@@ -70,6 +88,12 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * add UPDATE tabelName SET params statement
+     * @param tableName table to update
+     * @param params params to update
+     * @return this
+     */
     public QueryBuilder update(String tableName, String... params) {
         builder.append(UPDATE)
                 .append(tableName)
@@ -85,12 +109,25 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * add DELETE FROM tableName statement to {@link QueryBuilder#builder}
+     * @param tableName table to delete from
+     * @return this
+     */
     public QueryBuilder delete(String tableName) {
         builder.append(DELETE)
                 .append(tableName);
         return this;
     }
 
+    /**
+     * add type JOIN tableWithAlias ON param1 = param2 to {@link QueryBuilder#builder}
+     * @param type join type (INNER, LEFT, RIGHT, FULL)
+     * @param tableWithAlias table name space separated alias name
+     * @param param1 left param
+     * @param param2 right param
+     * @return this
+     */
     public QueryBuilder join(String type, String tableWithAlias, String param1, String param2) {
         builder.append(SPACE)
                 .append(type)
@@ -103,6 +140,11 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * add WHERE param = ? to {@link QueryBuilder#builder}
+     * @param param predicate parameter
+     * @return this
+     */
     public QueryBuilder whereAssign(String param) {
         builder.append(WHERE)
                 .append(param)
@@ -110,6 +152,11 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * add WHERE param REGEXP ?
+     * @param param param for regexp
+     * @return this
+     */
     public QueryBuilder whereRegexp(String param) {
         builder.append(WHERE)
                 .append(param)
@@ -118,6 +165,12 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * add WHERE param IN (...)
+     * @param param parameter to compare
+     * @param size in statement size
+     * @return this
+     */
     public QueryBuilder whereIn(String param, int size) {
         builder.append(WHERE)
                 .append(param)
@@ -133,6 +186,11 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * add ORDER BY params coma separated
+     * @param params order parameters
+     * @return this
+     */
     public QueryBuilder order(String... params) {
         builder.append(ORDER_BY);
         int i = 0;

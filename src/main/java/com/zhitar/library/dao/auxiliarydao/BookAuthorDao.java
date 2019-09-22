@@ -4,7 +4,11 @@ import com.zhitar.library.domain.BookAuthor;
 
 import java.util.List;
 
-public interface BookAuthorDAO {
+/**
+ * Manage auxiliary {@link BookAuthor} object that
+ * represent intermediate table for book and author
+ */
+public interface BookAuthorDao {
 
     BookAuthor save(BookAuthor bookAuthor);
 

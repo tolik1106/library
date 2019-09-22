@@ -12,6 +12,12 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Filter HttpServletRequest for accessing.
+ * If HttpSession doesn't have user then
+ * all paths except /login, /register and / will redirect to login page
+ * Otherwise pass checks to {@link UserFilter#doFilter(User, String, HttpServletResponse, HttpServletRequest, FilterChain)}
+ */
 public class AccessFilter implements Filter, Redirect {
 
     private static final Logger LOG = Logger.getLogger(AccessFilter.class.getName());

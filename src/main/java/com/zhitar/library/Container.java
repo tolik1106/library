@@ -3,8 +3,8 @@ package com.zhitar.library;
 import com.zhitar.library.annotation.TransactionProxyCreator;
 import com.zhitar.library.dao.attributedao.AttributeDao;
 import com.zhitar.library.dao.authordao.AuthorDao;
-import com.zhitar.library.dao.auxiliarydao.BookAttributeDAO;
-import com.zhitar.library.dao.auxiliarydao.BookAuthorDAO;
+import com.zhitar.library.dao.auxiliarydao.BookAttributeDao;
+import com.zhitar.library.dao.auxiliarydao.BookAuthorDao;
 import com.zhitar.library.dao.auxiliarydao.UserRoleDao;
 import com.zhitar.library.dao.bookdao.BookDao;
 import com.zhitar.library.dao.daofactory.AbstractDAOFactory;
@@ -36,8 +36,8 @@ public class Container {
         BookDao bookDAO = daoFactory.getBookDAO();
         AuthorDao authorDAO = daoFactory.getAuthorDAO();
         AttributeDao attributeDAO = daoFactory.getAttributeDAO();
-        BookAttributeDAO bookAttributeDAO = daoFactory.getBookAttributeDAO();
-        BookAuthorDAO bookAuthorDAO = daoFactory.getBookAuthorDAO();
+        BookAttributeDao bookAttributeDAO = daoFactory.getBookAttributeDAO();
+        BookAuthorDao bookAuthorDAO = daoFactory.getBookAuthorDAO();
         UserRoleDao userRoleDAO = daoFactory.getUserRoleDAO();
 
         UserServiceImpl userService = new UserServiceImpl(userDAO, roleDAO, userRoleDAO);

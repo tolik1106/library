@@ -11,6 +11,9 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
+/**
+ * Wrapper for Jndi dataSource
+ */
 public class JndiDataSource implements DataSource {
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(JndiDataSource.class.getName());

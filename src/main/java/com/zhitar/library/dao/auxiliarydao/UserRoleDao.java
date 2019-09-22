@@ -4,6 +4,10 @@ import com.zhitar.library.domain.UserRole;
 
 import java.util.List;
 
+/**
+ * Manage auxiliary {@link UserRole} object that
+ * represent intermediate table for user and role
+ */
 public interface UserRoleDao {
 
     UserRole save(UserRole userRole);

@@ -40,6 +40,7 @@ CREATE TABLE book
   owned_date           TIMESTAMP DEFAULT NULL,
   bookcase             INT NOT NULL,
   bookshelf            INT NOT NULL,
+  ordered              TINYINT(1) DEFAULT 0,
   PRIMARY KEY (id)
 );
 

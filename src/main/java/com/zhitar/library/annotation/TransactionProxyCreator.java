@@ -8,7 +8,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-
+/**
+ * This class creates proxy object for {@link Connectivity} annotated
+ * classes to use with database connection
+ */
 public class TransactionProxyCreator {
 
     @SuppressWarnings("unchecked")

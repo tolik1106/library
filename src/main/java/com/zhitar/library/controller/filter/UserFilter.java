@@ -11,6 +11,11 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * This class denied access for logged user to /login and /register pages.
+ * User with role 'ADMIN' got all permission and user with role 'USER'
+ * doesn't have permission for all url starts with /admin/
+ */
 public class UserFilter implements Redirect {
 
     private static final Logger LOG = Logger.getLogger(UserFilter.class.getName());

@@ -1,5 +1,6 @@
 package com.zhitar.library.service;
 
+import com.zhitar.library.annotation.Transaction;
 import com.zhitar.library.domain.Book;
 
 import java.util.Collection;
@@ -21,4 +22,6 @@ public interface BookService {
     long count();
 
     Collection<Book> findByUser(Integer userId);
+
+    Book cancelOrder(Integer bookId, Integer userId);
 }
