@@ -34,12 +34,20 @@
             </small>
         </div>
         <div class="form-group">
+            <label for="password"><fmt:message key="message.password"/></label>
+            <input id="password" name="password" class="form-control" type="password" required>
+            <small class="form-text text-danger collapse ${userpasswordError != null ? 'show' : ''}"><fmt:message key="${userpasswordError}"/></small>
+            <%--<small class="form-text text-danger collapse ${wrongPasswordError != null ? 'show' : ''}"><fmt:message key="${}" </small>--%>
+        </div>
+        <c:if test="${register}">
+        <div class="form-group">
             <label for="phone"><fmt:message key="message.phone"/></label>
             <input id="phone" name="phone" class="form-control" type="number" value="${registeredUser != null ? registeredUser.phone : ''}"
                    placeholder="0951234567">
             <small class="form-text text-danger collapse ${userphoneError != null ? 'show' : ''}"><fmt:message key="${userphoneError}"/></small>
         </div>
-            <fmt:message key="message.register" var="messageRegister"/>
+        </c:if>
+        <fmt:message key="message.register" var="messageRegister"/>
             <fmt:message key="message.login" var="messageLogin"/>
             <input type="submit" class="btn btn-primary" value="${register ? messageRegister : messageLogin}">
 </form>

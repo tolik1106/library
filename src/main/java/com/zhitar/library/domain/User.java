@@ -17,6 +17,8 @@ public class User extends AbstractEntity<Integer> {
     private String name;
     @Email(message = "message.useremail.error")
     private String email;
+    @Length(min = 5, max = 64, message = "message.userpassword.error")
+    private String password;
     @Phone(pattern = "^0(95|50|66|99|67|96|97|98|63|93|73)\\d{7}", message = "message.userphone.error")
     private String phone;
     private Set<Role> roles = new HashSet<>();
@@ -25,10 +27,11 @@ public class User extends AbstractEntity<Integer> {
     public User() {
     }
 
-    public User(Integer id, String name, String email, String phone) {
+    public User(Integer id, String name, String email, String password, String phone) {
         super(id);
         this.name = name;
         this.email = email;
+        this.password = password;
         this.phone = phone;
         this.roles.add(new Role(null, "USER"));
     }
@@ -47,6 +50,14 @@ public class User extends AbstractEntity<Integer> {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getPhone() {
@@ -87,6 +98,7 @@ public class User extends AbstractEntity<Integer> {
         return "User{" +
                 "id=" + id +
                 ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
                 ", phone='" + phone + '\'' +
                 '}';
     }

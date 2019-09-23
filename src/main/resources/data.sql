@@ -1,7 +1,7 @@
-INSERT INTO users (name, email, phone)
-VALUES ('tolik1106', 'tolik1106@gmail.com', '0950160701'),
-       ('marina', 'marina@i.ua', '0956842354'),
-       ('andriy', 'andriy@gmail.com', '0958496257');
+INSERT INTO users (name, email, password, phone)
+VALUES ('tolik1106', 'tolik1106@gmail.com', '00000', '0950160701'),
+       ('marina', 'marina@i.ua', '00000', '0956842354'),
+       ('andriy', 'andriy@gmail.com', '00000', '0958496257');
 
 INSERT INTO role (role)
 VALUES ('ADMIN'),

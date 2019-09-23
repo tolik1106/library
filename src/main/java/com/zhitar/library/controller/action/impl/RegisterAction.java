@@ -29,9 +29,10 @@ public class RegisterAction extends AbstractAction {
     protected String doPost(HttpServletRequest request, HttpServletResponse response) {
         String name = request.getParameter("name");
         String email = request.getParameter("email");
+        String password = request.getParameter("password");
         String phone = request.getParameter("phone");
-        LOG.info("doPost with name: " + name + ", email: " + email + ", phone: " + phone);
-        User user = new User(null, name, email, phone);
+        LOG.info("doPost with name: " + name + ", email: " + email + ", password: " + password + ", phone: " + phone);
+        User user = new User(null, name, email, password, phone);
         request.setAttribute("registeredUser", user);
         LOG.debug("validating user " + user);
         ValidationResult validationResult = validator.validate(User.class, user);

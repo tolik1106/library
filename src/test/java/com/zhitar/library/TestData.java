@@ -9,8 +9,8 @@ import java.util.*;
 
 public class TestData {
 
-    public static final User ADMIN = new User(1, "tolik1106", "tolik1106@gmail.com", "0950160701");
-    public static final User USER = new User(2, "marina", "marina@i.ua", "0956842354");
+    public static final User ADMIN = new User(1, "tolik1106", "tolik1106@gmail.com", "00000", "0950160701");
+    public static final User USER = new User(2, "marina", "marina@i.ua", "00000", "0956842354");
 
     public static final List<Role> ROLES = new ArrayList<Role>() {
         {
@@ -41,7 +41,7 @@ public class TestData {
     }
 
     public static User userToSave() {
-        User tolik = new User(null, "tolik", "user@user.com", "0951234567");
+        User tolik = new User(null, "tolik", "user@user.com", "00000", "0951234567");
         tolik.setRoles(Collections.singleton(new Role(null, "USER")));
         return tolik;
     }

@@ -28,6 +28,7 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
     private static final String BOOKSHELF_COLUMN = "bookshelf";
     private static final String ORDERED_COLUMN = "ordered";
     private static final String ERROR_MESSAGE = "An error occurred during execution";
+    private static final int PAGE_LIMIT = 10;
 
     public MySQLBookDao() {
         LOG.trace("Instantiating " + this.getClass().getName());
@@ -196,8 +197,8 @@ public class MySQLBookDao extends AbstractDao<Book, Integer> implements BookDao 
                 new QueryBuilder().select()
                         .table(TABLE)
                         .order(NAME_COLUMN)
-                        .limit(10)
-                        .offset(page * 10)
+                        .limit(PAGE_LIMIT)
+                        .offset(page * PAGE_LIMIT)
                         .build()
         )) {
             ResultSet resultSet = statement.executeQuery();

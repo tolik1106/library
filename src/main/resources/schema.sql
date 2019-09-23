@@ -93,6 +93,7 @@ CREATE TABLE users
   id                   INT NOT NULL AUTO_INCREMENT,
   name                 VARCHAR(64) NOT NULL,
   email                VARCHAR(255) NOT NULL,
+  password             VARCHAR(64) NOT NULL,
   phone                VARCHAR(10) NOT NULL,
   PRIMARY KEY (id),
   CONSTRAINT unique_user_email UNIQUE (email)

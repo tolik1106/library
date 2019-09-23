@@ -21,6 +21,7 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
     private static final String TABLE = TableNameResolver.getTableName(User.class);
     private static final String NAME_COLUMN = "name";
     private static final String EMAIL_COLUMN = "email";
+    private static final String PASSWORD_COLUMN = "password";
     private static final String PHONE_COLUMN = "phone";
     private static final String ID_COLUMN = "id";
 
@@ -32,11 +33,12 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
     public User save(User entity) {
         LOG.info("Execute save with user " + entity);
         try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
-                new QueryBuilder().insert(TABLE, NAME_COLUMN, EMAIL_COLUMN, PHONE_COLUMN).build()
+                new QueryBuilder().insert(TABLE, NAME_COLUMN, EMAIL_COLUMN, PASSWORD_COLUMN, PHONE_COLUMN).build()
                 , Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, entity.getName());
             statement.setString(2, entity.getEmail());
-            statement.setString(3, entity.getPhone());
+            statement.setString(3, entity.getPassword());
+            statement.setString(4, entity.getPhone());
             LOG.trace("executeUpdate statement");
             statement.executeUpdate();
             final ResultSet generatedKeys = statement.getGeneratedKeys();
@@ -86,7 +88,7 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
         User user = null;
         try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
                 new QueryBuilder()
-                        .select("u.id", "u.name", "u.email", "u.phone", "r.id", "r.role")
+                        .select("u.id", "u.name", "u.email", "u.password", "u.phone", "r.id", "r.role")
                         .table("users u")
                         .join("INNER", "user_role ur", "u.id", "ur.user_id")
                         .join("INNER", "role r", "ur.role_id", "r.id")
@@ -134,7 +136,7 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
     public Collection<User> findAllWithBooks() {
         LOG.info("Execute findAllWithBooks");
         try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
-                new QueryBuilder().select("u.id", "u.name", "u.email", "u.phone", "b.id", "b.name", "b.owned_date", "b.bookcase", "b.bookshelf", "b.ordered")
+                new QueryBuilder().select("u.id", "u.name", "u.email", "u.password", "u.phone", "b.id", "b.name", "b.owned_date", "b.bookcase", "b.bookshelf", "b.ordered")
                         .table("users u")
                         .join("INNER", "book b", "u.id", "b.user_id")
                         .order("u.name")
@@ -159,12 +161,12 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
 
     private User setBook(User user, ResultSet resultSet) throws SQLException {
         Book book = new Book();
-        book.setId(resultSet.getInt(5));
-        book.setName(resultSet.getString(6));
-        book.setOwnedDate(resultSet.getDate(7));
-        book.setBookcase(resultSet.getInt(8));
-        book.setBookshelf(resultSet.getInt(9));
-        book.setOrdered(resultSet.getBoolean(10));
+        book.setId(resultSet.getInt(6));
+        book.setName(resultSet.getString(7));
+        book.setOwnedDate(resultSet.getDate(8));
+        book.setBookcase(resultSet.getInt(9));
+        book.setBookshelf(resultSet.getInt(10));
+        book.setOrdered(resultSet.getBoolean(11));
         user.getBooks().add(book);
         return user;
     }
@@ -174,15 +176,16 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
         user.setId(resultSet.getInt(1));
         user.setName(resultSet.getString(2));
         user.setEmail(resultSet.getString(3));
-        user.setPhone(resultSet.getString(4));
+        user.setPassword(resultSet.getString(4));
+        user.setPhone(resultSet.getString(5));
         return user;
     }
 
     private void setRoles(User user, ResultSet resultSet) throws SQLException {
         do {
             Role role = new Role();
-            role.setId(resultSet.getInt(5));
-            role.setRole(resultSet.getString(6));
+            role.setId(resultSet.getInt(6));
+            role.setRole(resultSet.getString(7));
             user.getRoles().add(role);
         } while (resultSet.next());
     }
@@ -191,13 +194,14 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
     protected void update(User entity, Connection connection) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(
                 new QueryBuilder()
-                        .update(TABLE, NAME_COLUMN, EMAIL_COLUMN, PHONE_COLUMN)
+                        .update(TABLE, NAME_COLUMN, EMAIL_COLUMN, PASSWORD_COLUMN, PHONE_COLUMN)
                         .whereAssign(ID_COLUMN)
                         .build()
         )) {
             statement.setString(1, entity.getName());
             statement.setString(2, entity.getEmail());
-            statement.setString(3, entity.getPhone());
+            statement.setString(3, entity.getPassword());
+            statement.setString(4, entity.getPhone());
             statement.setInt(5, entity.getId());
             statement.executeUpdate();
         }

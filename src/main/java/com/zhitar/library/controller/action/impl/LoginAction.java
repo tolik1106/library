@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 public class LoginAction extends AbstractAction {
 
     private static final Logger LOG = Logger.getLogger(LoginAction.class);
+    private static final String DEFAULT_NAME = "unknown";
+    private static final String DEFAULT_PHONE = "0950000000";
 
     private UserService userService = Container.getInstance().getBean(UserService.class);
     private ValidationService validator = Container.getInstance().getBean(ValidationService.class);
@@ -29,9 +31,9 @@ public class LoginAction extends AbstractAction {
     @Override
     protected String doPost(HttpServletRequest request, HttpServletResponse response) {
         String email = request.getParameter("email");
-        String phone = request.getParameter("phone");
-        LOG.info("doPost with email: " + email + " and phone: " + phone);
-        User user = new User(null, "unknown", email, phone);
+        String password = request.getParameter("password");
+        LOG.info("doPost with email: " + email + " and password: " + password);
+        User user = new User(null, DEFAULT_NAME, email, password, DEFAULT_PHONE);
         request.setAttribute("registeredUser", user);
         LOG.debug("validating user");
         ValidationResult validationResult = validator.validate(User.class, user);
@@ -45,9 +47,9 @@ public class LoginAction extends AbstractAction {
         }
         LOG.debug("User validated successful");
         user = userService.findByEmail(email);
-        if (!phone.equals(user.getPhone())) {
-            LOG.debug("User phone doesn't match: " + phone + " - " + user.getPhone());
-            request.setAttribute("userphoneError", "Phone isn't correct. Please try again");
+        if (!password.equals(user.getPassword())) {
+            LOG.debug("User password doesn't match: " + password + " - " + user.getPassword());
+            request.setAttribute("userpasswordError", "message.wrong.password");
             return "login";
         } else {
             LOG.debug("add user to session: " + user);
