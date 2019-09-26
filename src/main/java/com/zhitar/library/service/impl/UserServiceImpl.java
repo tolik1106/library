@@ -53,15 +53,10 @@ public class UserServiceImpl implements UserService {
 
             List<UserRole> userRoleList = new ArrayList<>();
             for (Role userRole : saved.getRoles()) {
-                boolean newRole = true;
                 for (Role role : roles) {
                     if (userRole.equals(role)) {
                         userRole.setId(role.getId());
-                        newRole = false;
                     }
-                }
-                if (newRole) {
-                    roleDAO.save(userRole);
                 }
                 userRoleList.add(new UserRole(userRole.getId(), saved.getId()));
             }

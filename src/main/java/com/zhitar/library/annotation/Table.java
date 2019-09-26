@@ -1,15 +1,13 @@
 package com.zhitar.library.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Use this annotation if you want to specify
  * table name for your entity
  * @see com.zhitar.library.util.TableNameResolver
  */
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Table {

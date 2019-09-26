@@ -1,15 +1,13 @@
 package com.zhitar.library.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Describes a transaction attribute on an individual method
  * Use this annotation on class which have
  * {@link Connectivity} annotation
  */
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Transaction {
