@@ -39,9 +39,9 @@ public class BookRequestEntityResolver implements RequestEntityResolver<Book>, R
     }
 
     private <T> List<T> getList(String values, Function<String, T> mapper) {
-        String[] split = values.replaceAll(" ", "").split(",");
+        String[] split = values.split(",");
 
-        List<String> names = new ArrayList<>(Arrays.asList(split));
+        List<String> names = Arrays.stream(split).map(String::trim).collect(Collectors.toList());
         TreeSet<String> seen = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         names.removeIf(name -> !seen.add(name));
 
