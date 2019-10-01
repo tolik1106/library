@@ -27,6 +27,8 @@ public class AccessFilter implements Filter, Redirect {
 
     static {
         allPermission.add("/");
+        allPermission.add("(/img/)(.)*");
+        allPermission.add("(/webjars/)(.)*");
 
         authPermission.add("/login");
         authPermission.add("/register");
@@ -43,22 +45,22 @@ public class AccessFilter implements Filter, Redirect {
         String servletPath = httpRequest.getServletPath();
         LOG.info("filter request " + servletPath);
         //All permission
-        if (allPermission.contains(servletPath)) {
+        if (allPermission.contains(servletPath) || allPermission.stream().anyMatch(servletPath::matches)) {
             LOG.debug("FilterChain.doFilter()");
             chain.doFilter(request, response);
-        }
-
-        HttpSession session = httpRequest.getSession();
-        User user = (User) session.getAttribute("user");
-        if (user != null) {
-            LOG.debug("userFilter access for user " + user);
-            userFilter.doFilter(user, servletPath, httpResponse, httpRequest, chain);
         } else {
-            if (authPermission.contains(servletPath)) {
-                chain.doFilter(request, response);
+            HttpSession session = httpRequest.getSession();
+            User user = (User) session.getAttribute("user");
+            if (user != null) {
+                LOG.debug("userFilter access for user " + user);
+                userFilter.doFilter(user, servletPath, httpResponse, httpRequest, chain);
             } else {
-                LOG.trace("Redirect to login page");
-                sendRedirect(httpResponse);
+                if (authPermission.contains(servletPath)) {
+                    chain.doFilter(request, response);
+                } else {
+                    LOG.trace("Redirect to login page");
+                    sendRedirect(httpResponse);
+                }
             }
         }
     }
