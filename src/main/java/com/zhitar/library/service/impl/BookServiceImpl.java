@@ -133,6 +133,9 @@ public class BookServiceImpl implements BookService {
 
         for (Book book : books) {
             List<BookAuthor> bookAuthors = bookAuthorDAO.findByBookId(book.getId());
+            if (bookAuthors.isEmpty()) {
+                continue;
+            }
             List<Author> authors = authorDAO.findById(bookAuthors.stream().map(BookAuthor::getAuthorId).collect(Collectors.toList()));
             book.setAuthors(authors);
         }

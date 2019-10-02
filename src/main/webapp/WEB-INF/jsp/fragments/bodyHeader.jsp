@@ -10,7 +10,7 @@
     <fmt:message key="message.logout" var="logoutMessage"/>
     <c:set var="logout" value="<a href='logout'>${logoutMessage}</a>"/>
     <fmt:message key="message.book.list" var="bookListMessage"/>
-    <c:set var="books" value="<a class='nav-link' href='books'>${bookListMessage}</a>"/>
+    <c:set var="books" value="<a class='nav-link' href='books?page=0'>${bookListMessage}</a>"/>
 
     <span class="navbar-brand">
         <img src="img/library.png" class="d-inline-block align-top" alt="">
