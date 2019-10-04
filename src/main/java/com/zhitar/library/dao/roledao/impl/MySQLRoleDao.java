@@ -39,7 +39,7 @@ public class MySQLRoleDao implements RoleDao {
     @Override
     public Role update(Role entity) {
         Object[] params = {entity.getRole(), entity.getId()};
-        return DaoHelper.getInstance().update(UPDATE_QUERY, entity, params);
+        return DaoHelper.getInstance().executeUpdate(UPDATE_QUERY, entity, params);
     }
 
     @Override

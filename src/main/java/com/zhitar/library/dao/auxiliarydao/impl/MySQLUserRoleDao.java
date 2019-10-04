@@ -2,17 +2,13 @@ package com.zhitar.library.dao.auxiliarydao.impl;
 
 import com.zhitar.library.dao.auxiliarydao.UserRoleDao;
 import com.zhitar.library.domain.UserRole;
-import com.zhitar.library.exception.DaoException;
 import com.zhitar.library.sql.DaoHelper;
 import com.zhitar.library.sql.QueryBuilder;
-import com.zhitar.library.sql.TransactionHandler;
 import com.zhitar.library.util.TableNameResolver;
 import org.apache.log4j.Logger;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,7 +27,7 @@ public class MySQLUserRoleDao implements UserRoleDao {
 
     @Override
     public UserRole save(UserRole userRole) {
-        return DaoHelper.getInstance().save(INSERT_QUERY, userRole, userRole.getUserId(), userRole.getRoleId());
+        return DaoHelper.getInstance().executeUpdate(INSERT_QUERY, userRole, userRole.getUserId(), userRole.getRoleId());
     }
 
     @Override

@@ -28,7 +28,7 @@ public class MySQLBookAttributeDao implements BookAttributeDao {
 
     @Override
     public BookAttribute save(BookAttribute bookAttribute) {
-        return DaoHelper.getInstance().save(INSERT_QUERY, bookAttribute, bookAttribute.getBookId(), bookAttribute.getAttributeId());
+        return DaoHelper.getInstance().executeUpdate(INSERT_QUERY, bookAttribute, bookAttribute.getBookId(), bookAttribute.getAttributeId());
     }
 
     @Override

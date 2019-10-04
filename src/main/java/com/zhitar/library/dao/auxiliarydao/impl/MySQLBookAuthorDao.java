@@ -28,7 +28,7 @@ public class MySQLBookAuthorDao implements BookAuthorDao {
 
     @Override
     public BookAuthor save(BookAuthor bookAuthor) {
-        return DaoHelper.getInstance().save(INSERT_QUERY, bookAuthor, bookAuthor.getBookId(), bookAuthor.getAuthorId());
+        return DaoHelper.getInstance().executeUpdate(INSERT_QUERY, bookAuthor, bookAuthor.getBookId(), bookAuthor.getAuthorId());
     }
 
     @Override

@@ -52,7 +52,7 @@ public class MySQLAttributeDao implements AttributeDao {
     public Attribute update(Attribute entity) {
         LOG.info("Execute update " + entity);
         Object[] params = {entity.getName(), entity.getId()};
-        return DaoHelper.getInstance().update(UPDATE_QUERY, entity, params);
+        return DaoHelper.getInstance().executeUpdate(UPDATE_QUERY, entity, params);
     }
 
     @Override

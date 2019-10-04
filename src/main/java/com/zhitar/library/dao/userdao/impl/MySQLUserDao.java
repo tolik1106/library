@@ -65,7 +65,7 @@ public class MySQLUserDao implements UserDao {
                 entity.getPhone(),
                 entity.getId()
         };
-        return DaoHelper.getInstance().update(UPDATE_QUERY, entity, params);
+        return DaoHelper.getInstance().executeUpdate(UPDATE_QUERY, entity, params);
     }
 
     @Override

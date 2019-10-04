@@ -74,19 +74,6 @@ public class DaoHelper {
     }
 
     // Save auxiliary
-    public <T> T save(String query, T entity, Object... params) {
-        LOG.info("Execute save with entity " + entity);
-        try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(query)) {
-            fillPreparedStatement(statement, params);
-            LOG.trace("executeUpdate statement");
-            statement.executeUpdate();
-            return entity;
-        } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage());
-        }
-    }
-
     public <T> List<T> saveBatch(String query, List<T> list, Object... params) {
         try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(query)) {
             LOG.trace("Prepare batch");
@@ -103,7 +90,7 @@ public class DaoHelper {
         }
     }
 
-    public <T> T update(String query, T entity, Object... params) {
+    public <T> T executeUpdate(String query, T entity, Object... params) {
         LOG.info("Execute update with entity " + entity);
         try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(query)) {
             fillPreparedStatement(statement, params);
@@ -155,13 +142,7 @@ public class DaoHelper {
         ) {
             LOG.trace("executeQuery statement");
             List<T> entities = new ArrayList<>();
-            int row = 1;
-            while (resultSet.next()) {
-                T entity = rowMapper.mapRow(resultSet, row);
-                LOG.trace("Entity " + entity);
-                entities.add(entity);
-                row++;
-            }
+            extractResultSetInList(rowMapper, resultSet, entities);
             LOG.trace("Entity List " + entities);
             return entities;
         } catch (SQLException e) {
@@ -190,13 +171,7 @@ public class DaoHelper {
             fillPreparedStatement(statement, params);
             ResultSet resultSet = statement.executeQuery();
             List<T> entities = new ArrayList<>();
-            int row = 1;
-            while (resultSet.next()) {
-                T entity = rowMapper.mapRow(resultSet, row);
-                LOG.trace("Entity " + entity);
-                entities.add(entity);
-                row++;
-            }
+            extractResultSetInList(rowMapper, resultSet, entities);
             LOG.trace("Entity List " + entities);
             return entities;
         } catch (SQLException e) {
@@ -217,5 +192,15 @@ public class DaoHelper {
 
     private static class DaoHelperHolder {
         private static final DaoHelper INSTANCE = new DaoHelper();
+    }
+
+    private <T> void extractResultSetInList(RowMapper<T> rowMapper, ResultSet resultSet, List<T> entities) throws SQLException {
+        int row = 1;
+        while (resultSet.next()) {
+            T entity = rowMapper.mapRow(resultSet, row);
+            LOG.trace("Entity " + entity);
+            entities.add(entity);
+            row++;
+        }
     }
 }
