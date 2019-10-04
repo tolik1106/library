@@ -2,16 +2,13 @@ package com.zhitar.library.dao.auxiliarydao.impl;
 
 import com.zhitar.library.dao.auxiliarydao.BookAttributeDao;
 import com.zhitar.library.domain.BookAttribute;
-import com.zhitar.library.exception.DaoException;
+import com.zhitar.library.sql.DaoHelper;
 import com.zhitar.library.sql.QueryBuilder;
-import com.zhitar.library.sql.TransactionHandler;
 import com.zhitar.library.util.TableNameResolver;
 import org.apache.log4j.Logger;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,7 +18,9 @@ public class MySQLBookAttributeDao implements BookAttributeDao {
 
     private static final String TABLE = TableNameResolver.getTableName(BookAttribute.class);
     private static final String BOOK_ID = "book_id";
+    private static final String DELETE_QUERY = new QueryBuilder().delete(TABLE).whereAssign(BOOK_ID).build();
     private static final String ATTRIBUTE_ID = "attribute_id";
+    private static final String INSERT_QUERY = new QueryBuilder().insert(TABLE, BOOK_ID, ATTRIBUTE_ID).build();
 
     public MySQLBookAttributeDao() {
         LOG.trace("Instantiating " + this.getClass().getName());
@@ -29,20 +28,7 @@ public class MySQLBookAttributeDao implements BookAttributeDao {
 
     @Override
     public BookAttribute save(BookAttribute bookAttribute) {
-        LOG.info("Execute save with bookAttribute " + bookAttribute);
-
-        try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
-                new QueryBuilder().insert(TABLE, BOOK_ID, ATTRIBUTE_ID).build()
-        )) {
-            statement.setInt(1, bookAttribute.getBookId());
-            statement.setInt(2, bookAttribute.getAttributeId());
-            LOG.trace("executeUpdate statement");
-            statement.executeUpdate();
-            return bookAttribute;
-        } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage());
-        }
+        return DaoHelper.getInstance().save(INSERT_QUERY, bookAttribute, bookAttribute.getBookId(), bookAttribute.getAttributeId());
     }
 
     @Override
@@ -51,22 +37,17 @@ public class MySQLBookAttributeDao implements BookAttributeDao {
         if (attributes.size() == 1) {
             return Collections.singletonList(save(attributes.get(0)));
         }
-        try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
-                new QueryBuilder().insert(TABLE, BOOK_ID, ATTRIBUTE_ID).build()
-        )) {
-            LOG.trace("Prepare batch");
-            for (BookAttribute bookAttribute : attributes) {
-                statement.setInt(1, bookAttribute.getBookId());
-                statement.setInt(2, bookAttribute.getAttributeId());
-                statement.addBatch();
-            }
-            LOG.trace("executeBatch statement");
-            statement.executeBatch();
-            return attributes;
-        } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage());
+        Object[] params = new Object[attributes.size() * 2];
+        int index = 0;
+        for (BookAttribute attribute : attributes) {
+            params[index++] = attribute.getBookId();
+            params[index++] = attribute.getAttributeId();
         }
+        return DaoHelper.getInstance().saveBatch(
+                INSERT_QUERY,
+                attributes,
+                params
+        );
     }
 
     @Override
@@ -82,45 +63,19 @@ public class MySQLBookAttributeDao implements BookAttributeDao {
     @Override
     public boolean delete(Integer bookId) {
         LOG.info("Execute delete with bookId " + bookId);
-        try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
-                new QueryBuilder().delete(TABLE).whereAssign(BOOK_ID).build()
-        )) {
-            statement.setInt(1, bookId);
-            LOG.trace("executeUpdate statement");
-            boolean result = statement.executeUpdate() != 0;
-            LOG.trace("Result: " + result);
-            return result;
-        } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage());
-        }
+        return DaoHelper.getInstance().delete(DELETE_QUERY, bookId);
     }
 
     private List<BookAttribute> findById(String column, Integer value) {
         LOG.info("Execute findById with column " + column + " and id " + value);
-        try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
-                new QueryBuilder().select().table(TABLE).whereAssign(column).build()
-        )) {
-            statement.setInt(1, value);
-            LOG.trace("executeQuery statement");
-            ResultSet resultSet = statement.executeQuery();
-            return getBookAttributes(resultSet);
-        } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage());
-        }
+        return DaoHelper.getInstance().findList(
+                new QueryBuilder().select().table(TABLE).whereAssign(column).build(),
+                this::getBookAttribute,
+                value
+        );
     }
 
-    private List<BookAttribute> getBookAttributes(ResultSet resultSet) throws SQLException {
-        List<BookAttribute> bookAttributes = new ArrayList<>();
-        while (resultSet.next()) {
-            bookAttributes.add(getBookAttribute(resultSet));
-        }
-        LOG.trace("Retrieved bookAttributes " + bookAttributes);
-        return bookAttributes;
-    }
-
-    private BookAttribute getBookAttribute(ResultSet resultSet) throws SQLException {
+    private BookAttribute getBookAttribute(ResultSet resultSet, int row) throws SQLException {
         BookAttribute bookAttribute = new BookAttribute();
         bookAttribute.setAttributeId(resultSet.getInt(1));
         bookAttribute.setBookId(resultSet.getInt(2));

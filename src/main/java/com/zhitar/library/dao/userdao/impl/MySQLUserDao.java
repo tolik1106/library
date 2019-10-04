@@ -1,29 +1,50 @@
 package com.zhitar.library.dao.userdao.impl;
 
-import com.zhitar.library.dao.AbstractDao;
 import com.zhitar.library.dao.userdao.UserDao;
 import com.zhitar.library.domain.Book;
 import com.zhitar.library.domain.Role;
 import com.zhitar.library.domain.User;
-import com.zhitar.library.exception.DaoException;
+import com.zhitar.library.sql.DaoHelper;
 import com.zhitar.library.sql.QueryBuilder;
-import com.zhitar.library.sql.TransactionHandler;
 import com.zhitar.library.util.TableNameResolver;
 import org.apache.log4j.Logger;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao {
+public class MySQLUserDao implements UserDao {
 
     private static final Logger LOG = Logger.getLogger(MySQLUserDao.class.getName());
 
     private static final String TABLE = TableNameResolver.getTableName(User.class);
+    private static final String ID_COLUMN = "id";
     private static final String NAME_COLUMN = "name";
     private static final String EMAIL_COLUMN = "email";
     private static final String PASSWORD_COLUMN = "password";
     private static final String PHONE_COLUMN = "phone";
-    private static final String ID_COLUMN = "id";
+    private static final String UPDATE_QUERY = new QueryBuilder()
+            .update(TABLE, NAME_COLUMN, EMAIL_COLUMN, PASSWORD_COLUMN, PHONE_COLUMN)
+            .whereAssign(ID_COLUMN)
+            .build();
+    private static final String INSERT_QUERY = new QueryBuilder().insert(TABLE, NAME_COLUMN, EMAIL_COLUMN, PASSWORD_COLUMN, PHONE_COLUMN).build();
+    private static final String FIND_BY_ID_QUERY = new QueryBuilder().select().table(TABLE).whereAssign(ID_COLUMN).build();
+    private static final String FIND_ALL_QUERY = new QueryBuilder().select().table(TABLE).build();
+    private static final String DELETE_QUERY = new QueryBuilder().delete(TABLE).whereAssign(ID_COLUMN).build();
+    private static final String FIND_BY_EMAIL_WITH_ROLES_QUERY = new QueryBuilder()
+            .select("u.id", "u.name", "u.email", "u.password", "u.phone", "r.id", "r.role")
+            .table("users u")
+            .join("INNER", "user_role ur", "u.id", "ur.user_id")
+            .join("INNER", "role r", "ur.role_id", "r.id")
+            .whereAssign("email").build();
+    private static final String FIND_ALL_WITH_BOOKS_QUERY = new QueryBuilder()
+            .select("u.id", "u.name", "u.email", "u.password", "u.phone", "b.id", "b.name", "b.owned_date", "b.bookcase", "b.bookshelf", "b.ordered")
+            .table("users u")
+            .join("INNER", "book b", "u.id", "b.user_id")
+            .order("u.name", "b.name")
+            .build();
 
     public MySQLUserDao() {
         LOG.trace("Instantiating " + this.getClass().getName());
@@ -31,135 +52,48 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
 
     @Override
     public User save(User entity) {
-        LOG.info("Execute save with user " + entity);
-        try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
-                new QueryBuilder().insert(TABLE, NAME_COLUMN, EMAIL_COLUMN, PASSWORD_COLUMN, PHONE_COLUMN).build()
-                , Statement.RETURN_GENERATED_KEYS)) {
-            statement.setString(1, entity.getName());
-            statement.setString(2, entity.getEmail());
-            statement.setString(3, entity.getPassword());
-            statement.setString(4, entity.getPhone());
-            LOG.trace("executeUpdate statement");
-            statement.executeUpdate();
-            final ResultSet generatedKeys = statement.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                int key = generatedKeys.getInt(1);
-                LOG.trace("Generated key is " + key);
-                entity.setId(key);
-            }
-            LOG.trace("Saved user " + entity);
-        } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage());
-        }
-        return entity;
+        Object[] params = {entity.getName(), entity.getEmail(), entity.getPassword(), entity.getPhone()};
+        return DaoHelper.getInstance().save(INSERT_QUERY, entity, Integer.class, params);
     }
 
     @Override
     public User update(User entity) {
-        LOG.info("Execute update with user " + entity);
-        return super.update(entity);
+        Object[] params = {
+                entity.getName(),
+                entity.getEmail(),
+                entity.getPassword(),
+                entity.getPhone(),
+                entity.getId()
+        };
+        return DaoHelper.getInstance().update(UPDATE_QUERY, entity, params);
     }
 
     @Override
     public User findById(Integer id) {
-        LOG.info("Execute findById with id " + id);
-        User user = null;
-        try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
-                new QueryBuilder().select().table(TABLE).whereAssign(ID_COLUMN).build())
-        ) {
-            statement.setInt(1, id);
-            LOG.trace("executeQuery statement");
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                user = getUser(resultSet);
-                LOG.trace("User " + user);
-            }
-        } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage());
-        }
-        return user;
+        return DaoHelper.getInstance().find(FIND_BY_ID_QUERY, this::getUser, id);
     }
 
     @Override
     public User findByEmail(String email) {
-        LOG.info("Execute findByEmail with email " + email);
-        User user = null;
-        try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
-                new QueryBuilder()
-                        .select("u.id", "u.name", "u.email", "u.password", "u.phone", "r.id", "r.role")
-                        .table("users u")
-                        .join("INNER", "user_role ur", "u.id", "ur.user_id")
-                        .join("INNER", "role r", "ur.role_id", "r.id")
-                        .whereAssign("email").build()
-        )) {
-            statement.setString(1, email);
-            LOG.trace("executeQuery statement");
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                user = getUser(resultSet);
-                LOG.trace("User " + user);
-                setRoles(user, resultSet);
-                LOG.trace("User after with roles" + user);
-            }
-            return user;
-        } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage());
-        }
+        return DaoHelper.getInstance().find(FIND_BY_EMAIL_WITH_ROLES_QUERY, this::getUserWithRoles, email);
     }
 
     @Override
     public List<User> findAll() {
-        LOG.info("Execute findAll");
-        try (Statement statement = TransactionHandler.getConnection().createStatement();
-             ResultSet resultSet = statement.executeQuery(
-                     new QueryBuilder().select().table(TABLE).build()
-             )) {
-            LOG.trace("executeQuery statement");
-            List<User> users = new ArrayList<>();
-            while (resultSet.next()) {
-                User user = getUser(resultSet);
-                LOG.trace("User " + user);
-                users.add(user);
-            }
-            LOG.trace("User List " + users);
-            return users;
-        } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage());
-        }
+        return DaoHelper.getInstance().findAll(FIND_ALL_QUERY, this::getUser);
     }
 
     @Override
     public Collection<User> findAllWithBooks() {
-        LOG.info("Execute findAllWithBooks");
-        try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
-                new QueryBuilder().select("u.id", "u.name", "u.email", "u.password", "u.phone", "b.id", "b.name", "b.owned_date", "b.bookcase", "b.bookshelf", "b.ordered")
-                        .table("users u")
-                        .join("INNER", "book b", "u.id", "b.user_id")
-                        .order("u.name")
-                        .build()
-        )) {
-            LOG.trace("executeQuery statement");
-            ResultSet resultSet = statement.executeQuery();
-            Map<Integer, User> usersMap = new LinkedHashMap<>();
-            while (resultSet.next()) {
-                User user = getUser(resultSet);
-                LOG.trace("User " + user);
-                User newUser = setBook(usersMap.getOrDefault(user.getId(), user), resultSet);
-                usersMap.put(user.getId(), newUser);
-                LOG.trace("User with books" + newUser);
-            }
-            return usersMap.values();
-        } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage());
-        }
+        return DaoHelper.getInstance().find(FIND_ALL_WITH_BOOKS_QUERY, this::getAllWithBooks);
     }
 
-    private User setBook(User user, ResultSet resultSet) throws SQLException {
+    @Override
+    public boolean delete(Integer id) {
+        return DaoHelper.getInstance().delete(DELETE_QUERY, id);
+    }
+
+    private void setBook(User user, ResultSet resultSet) throws SQLException {
         Book book = new Book();
         book.setId(resultSet.getInt(6));
         book.setName(resultSet.getString(7));
@@ -168,10 +102,9 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
         book.setBookshelf(resultSet.getInt(10));
         book.setOrdered(resultSet.getBoolean(11));
         user.getBooks().add(book);
-        return user;
     }
 
-    private User getUser(ResultSet resultSet) throws SQLException {
+    private User getUser(ResultSet resultSet, int row) throws SQLException {
         User user = new User();
         user.setId(resultSet.getInt(1));
         user.setName(resultSet.getString(2));
@@ -182,38 +115,39 @@ public class MySQLUserDao extends AbstractDao<User, Integer> implements UserDao 
     }
 
     private void setRoles(User user, ResultSet resultSet) throws SQLException {
-        do {
             Role role = new Role();
             role.setId(resultSet.getInt(6));
             role.setRole(resultSet.getString(7));
             user.getRoles().add(role);
-        } while (resultSet.next());
     }
 
-    @Override
-    protected void update(User entity, Connection connection) throws SQLException {
-        try (PreparedStatement statement = connection.prepareStatement(
-                new QueryBuilder()
-                        .update(TABLE, NAME_COLUMN, EMAIL_COLUMN, PASSWORD_COLUMN, PHONE_COLUMN)
-                        .whereAssign(ID_COLUMN)
-                        .build()
-        )) {
-            statement.setString(1, entity.getName());
-            statement.setString(2, entity.getEmail());
-            statement.setString(3, entity.getPassword());
-            statement.setString(4, entity.getPhone());
-            statement.setInt(5, entity.getId());
-            statement.executeUpdate();
+    private User getUserWithRoles(ResultSet resultSet) throws SQLException {
+        List<User> users = new ArrayList<>();
+        int row = 1;
+        while (resultSet.next()) {
+            User user = getUser(resultSet, row);
+            if (users.contains(user)) {
+                user = users.remove(users.size() - 1);
+            }
+            setRoles(user, resultSet);
+            users.add(user);
+            row++;
         }
+        return users.get(0);
     }
 
-    @Override
-    protected String getTableName() {
-        return TABLE;
-    }
-
-    @Override
-    protected String getIdColumnName() {
-        return ID_COLUMN;
+    private List<User> getAllWithBooks(ResultSet resultSet) throws SQLException{
+        List<User> users = new ArrayList<>();
+        int row = 1;
+        while (resultSet.next()) {
+            User user = getUser(resultSet, row);
+            if (users.contains(user)) {
+                user = users.remove(users.size() - 1);
+            }
+            setBook(user, resultSet);
+            users.add(user);
+            row++;
+        }
+        return users;
     }
 }

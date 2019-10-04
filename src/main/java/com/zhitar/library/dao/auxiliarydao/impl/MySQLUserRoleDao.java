@@ -3,6 +3,7 @@ package com.zhitar.library.dao.auxiliarydao.impl;
 import com.zhitar.library.dao.auxiliarydao.UserRoleDao;
 import com.zhitar.library.domain.UserRole;
 import com.zhitar.library.exception.DaoException;
+import com.zhitar.library.sql.DaoHelper;
 import com.zhitar.library.sql.QueryBuilder;
 import com.zhitar.library.sql.TransactionHandler;
 import com.zhitar.library.util.TableNameResolver;
@@ -22,6 +23,7 @@ public class MySQLUserRoleDao implements UserRoleDao {
     private static final String TABLE = TableNameResolver.getTableName(UserRole.class);
     private static final String USER_ID = "user_id";
     private static final String ROLE_ID = "role_id";
+    private static final String INSERT_QUERY = new QueryBuilder().insert(TABLE, USER_ID, ROLE_ID).build();
 
     public MySQLUserRoleDao() {
         LOG.trace("Instantiating " + this.getClass().getName());
@@ -29,19 +31,7 @@ public class MySQLUserRoleDao implements UserRoleDao {
 
     @Override
     public UserRole save(UserRole userRole) {
-        LOG.info("Execute save with userRole " + userRole);
-        try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
-                new QueryBuilder().insert(TABLE, USER_ID, ROLE_ID).build()
-        )) {
-            statement.setInt(1, userRole.getUserId());
-            statement.setInt(2, userRole.getRoleId());
-            LOG.trace("executeUpdate statement");
-            statement.executeUpdate();
-            return userRole;
-        } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage());
-        }
+        return DaoHelper.getInstance().save(INSERT_QUERY, userRole, userRole.getUserId(), userRole.getRoleId());
     }
 
     @Override
@@ -50,22 +40,17 @@ public class MySQLUserRoleDao implements UserRoleDao {
         if (userRoleList.size() == 1) {
             return Collections.singletonList(save(userRoleList.get(0)));
         }
-        try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
-                new QueryBuilder().insert(TABLE, USER_ID, ROLE_ID).build()
-        )) {
-            LOG.trace("Prepare batch");
-            for (UserRole userRole : userRoleList) {
-                statement.setInt(1, userRole.getUserId());
-                statement.setInt(2, userRole.getRoleId());
-                statement.addBatch();
-            }
-            LOG.trace("executeBatch statement");
-            statement.executeBatch();
-            return userRoleList;
-        } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage());
+        Object[] params = new Object[userRoleList.size() * 2];
+        int index = 0;
+        for (UserRole userRole : userRoleList) {
+            params[index++] = userRole.getUserId();
+            params[index++] = userRole.getRoleId();
         }
+        return DaoHelper.getInstance().saveBatch(
+                INSERT_QUERY,
+                userRoleList,
+                params
+        );
     }
 
     @Override
@@ -80,32 +65,17 @@ public class MySQLUserRoleDao implements UserRoleDao {
 
     private List<UserRole> findById(String column, Integer value) {
         LOG.info("Execute findById with column " + column + " and id " + value);
-        try (PreparedStatement statement = TransactionHandler.getConnection().prepareStatement(
+        return DaoHelper.getInstance().findList(
                 new QueryBuilder().select()
                         .table(TABLE)
                         .whereAssign(column)
-                        .build()
-        )) {
-            statement.setInt(1, value);
-            LOG.trace("executeQuery statement");
-            ResultSet resultSet = statement.executeQuery();
-            return getUserRoles(resultSet);
-        } catch (SQLException e) {
-            LOG.error("An error occurred during execution", e);
-            throw new DaoException(e.getMessage());
-        }
+                        .build(),
+                this::getUserRole,
+                value
+        );
     }
 
-    private List<UserRole> getUserRoles(ResultSet resultSet) throws SQLException {
-        List<UserRole> userRoleList = new ArrayList<>();
-        while (resultSet.next()) {
-            userRoleList.add(getUserRole(resultSet));
-        }
-        LOG.trace("Retrieved userRoles " + userRoleList);
-        return userRoleList;
-    }
-
-    private UserRole getUserRole(ResultSet resultSet) throws SQLException {
+    private UserRole getUserRole(ResultSet resultSet, int row) throws SQLException {
         UserRole userRole = new UserRole();
         userRole.setRoleId(resultSet.getInt(1));
         userRole.setUserId(resultSet.getInt(2));
